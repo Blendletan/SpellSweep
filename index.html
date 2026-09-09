@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpellSweep</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>SpellSweep</h1>
+      <p class="instructions">
+        Select adjacent tiles to make a word. Cover every tile to finish.
+      </p>
+
+      <section class="score" aria-label="Current score">
+        <span>Words: <strong id="words-used">0</strong></span>
+        <span>Covered: <strong id="covered-count">0</strong>/25</span>
+        <span>Time: <strong id="elapsed-time">0:00</strong></span>
+      </section>
+
+      <div id="board" class="board" aria-label="SpellSweep board"></div>
+
+      <section class="word-panel" aria-label="Selected word">
+        <div id="current-word" class="current-word">Select a tile</div>
+        <label id="wildcard-control" class="wildcard-control" hidden>
+          Wildcard letter
+          <input
+            id="wildcard-letter"
+            type="text"
+            inputmode="text"
+            maxlength="1"
+            autocomplete="off"
+            aria-label="Letter represented by the wildcard"
+          />
+        </label>
+        <div class="actions">
+          <button id="submit-word" type="button" disabled>Submit word</button>
+          <button id="clear-path" type="button" disabled>Clear</button>
+        </div>
+      </section>
+
+      <p id="message" class="message" role="status" aria-live="polite">
+        Loading dictionary…
+      </p>
+
+      <button id="new-puzzle" class="new-puzzle" type="button" disabled>
+        New puzzle
+      </button>
+    </main>
+
+    <script type="module" src="./build/main.js"></script>
+  </body>
+</html>
