@@ -241,6 +241,36 @@ Completion criteria: the tested interaction works reliably across the target dev
 
 Completion criteria: the stabilized game is attractive, accessible, and verified on its final static GitHub Pages deployment.
 
+## Milestone 16: Player Tutorial
+
+- [ ] Decide how players enter, dismiss, and replay the tutorial without obstructing normal play.
+- [ ] Explain the objective: cover all 25 tiles by submitting valid words.
+- [ ] Demonstrate adjacent horizontal, vertical, and diagonal tile selection.
+- [ ] Explain that a tile cannot be repeated within one word but may be reused in later words.
+- [ ] Demonstrate entering a letter for the center wildcard and explain that it may represent a different letter in each word.
+- [ ] Explain covered and uncovered tile states, scoring, the timer, and the consequence of Reveal Answer.
+- [ ] Keep the tutorial concise, keyboard accessible, touch friendly, and available to replay.
+- [ ] Verify the tutorial on desktop, touchscreen laptop, and phone without changing the tested game rules.
+
+Prefer a small in-page walkthrough built with the existing HTML, CSS, and TypeScript. Do not add an onboarding framework or dependency.
+
+Completion criteria: a first-time player can understand and begin playing SpellSweep without outside instructions, and an experienced player can skip or reopen the tutorial easily.
+
+## Milestone 17: GoatCounter Analytics
+
+- [ ] Create or confirm the GoatCounter site and obtain its public site code.
+- [ ] Add GoatCounter's smallest supported page-view integration to the static site.
+- [ ] Record one custom event whenever a player activates the Share Result button.
+- [ ] Count the share-button activation without including the puzzle, score, share text, or other player-entered data.
+- [ ] Ensure analytics failure or blocking never interferes with gameplay or sharing.
+- [ ] Add a brief privacy disclosure if the final GoatCounter configuration or applicable policy requires one.
+- [ ] Verify production page-view counting on GitHub Pages.
+- [ ] Verify the Share Result event is counted once per button activation on desktop and mobile.
+
+Keep this limited to aggregate page visits and Share Result button activations. Do not add a tag manager, analytics framework, cookies, user accounts, or broader behavioral tracking.
+
+Completion criteria: GoatCounter reports public-site visits and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those two aggregate events.
+
 ## Ongoing Constraints
 
 - Keep the implementation to a handful of meaningful files and roughly hundreds to one thousand lines of handwritten application code when practical.
