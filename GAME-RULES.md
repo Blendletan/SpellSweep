@@ -105,6 +105,8 @@ For the current prototype, this file contains the North American Scrabble dictio
 
 A submitted word is valid if it can be formed according to the board rules and exists in this dictionary.
 
+The tutorial must tell players that SpellSweep uses the North American Scrabble dictionary so they understand which words the game recognizes.
+
 Do not substitute another dictionary unless explicitly instructed.
 
 ---
@@ -126,6 +128,8 @@ A valid word is therefore allowed to use:
 - or any mixture of the two.
 
 A word that covers no new tiles is still a valid submitted word and still counts toward the player's number of words used.
+
+The same valid word may be submitted more than once, using either the same legal path or a different legal path. Every accepted submission counts as another word used, even when the spelling has already been accepted.
 
 There is no undo.
 
@@ -205,6 +209,28 @@ The player may waste words and worsen their score, but cannot softlock the game 
 
 ---
 
+# Tutorial
+
+SpellSweep must include a short, step-by-step tutorial built around a fixed example 5×5 board. The tutorial is explanatory rather than a separate playable puzzle and must not change or reset the player's current puzzle.
+
+The tutorial must:
+
+- explain that the goal is to cover all 25 tiles with valid words;
+- identify the word list as the North American Scrabble dictionary;
+- demonstrate horizontal, vertical, and diagonal movement;
+- explain that a tile cannot be used twice within one word;
+- demonstrate that covered tiles remain available in later words;
+- explain that the same valid word may be submitted more than once and that every accepted submission increases the score;
+- demonstrate entering a letter for the center wildcard and explain that its letter may change between words;
+- explain word-count scoring, Perfect, Par, covered and uncovered tiles, and Reveal Answer;
+- walk through a valid but suboptimal solution before showing the simpler path the example player missed.
+
+The tutorial must open automatically when a player visits SpellSweep for the first time. Dismissing or completing it records a first-party functional cookie so it does not open automatically on later visits. A permanent How to play control must remain available so the tutorial can be reopened from its first step at any time.
+
+The tutorial must be dismissible, keyboard accessible, touch friendly, and usable on both desktop and phone-sized screens.
+
+---
+
 # Puzzle Modes
 
 SpellSweep has one deliberate runtime mode switch.
@@ -268,19 +294,20 @@ The implementation should preserve these rules:
 7. Tiles may be reused freely between different words.
 8. Two-letter words are allowed.
 9. The wildcard may represent a different letter in every word.
-10. Accepted words permanently increase the word count.
-11. Accepted words permanently mark their tiles as covered.
-12. Covering a tile does not make it unavailable.
-13. Invalid submissions do not alter game state.
-14. There is no undo for accepted words.
-15. The game ends immediately when all 25 tiles are covered.
-16. The player's score is the number of accepted words used.
-17. Daily mode changes puzzle at local midnight.
-18. Debug mode produces a new puzzle on refresh.
-19. No accepted move can make a solvable puzzle unsolvable.
-20. Perfect is the exact minimum number of words needed to cover the board.
-21. Par is Perfect plus 3.
-22. Revealing the answer after a win does not change the winning result.
+10. The same valid word may be accepted more than once.
+11. Accepted words permanently increase the word count.
+12. Accepted words permanently mark their tiles as covered.
+13. Covering a tile does not make it unavailable.
+14. Invalid submissions do not alter game state.
+15. There is no undo for accepted words.
+16. The game ends immediately when all 25 tiles are covered.
+17. The player's score is the number of accepted words used.
+18. Daily mode changes puzzle at local midnight.
+19. Debug mode produces a new puzzle on refresh.
+20. No accepted move can make a solvable puzzle unsolvable.
+21. Perfect is the exact minimum number of words needed to cover the board.
+22. Par is Perfect plus 3.
+23. Revealing the answer after a win does not change the winning result.
 
 ---
 

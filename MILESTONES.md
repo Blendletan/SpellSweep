@@ -304,18 +304,38 @@ Completion criteria: the stabilized game is attractive, accessible, and verified
 
 ## Milestone 17: Player Tutorial
 
-- [ ] Decide how players enter, dismiss, and replay the tutorial without obstructing normal play.
-- [ ] Explain the objective: cover all 25 tiles by submitting valid words.
-- [ ] Demonstrate adjacent horizontal, vertical, and diagonal tile selection.
-- [ ] Explain that a tile cannot be repeated within one word but may be reused in later words.
+This is the current implementation priority within the iterative playtesting loop. The planned interaction follows the concise staged approach used by the WordWeb tutorial: a fixed example advances through short explanations, first completing the puzzle inefficiently and then exposing the simpler route the example player missed.
+
+- [x] Decide the overall tutorial approach: use a fixed, explanatory 5×5 example board in a modal walkthrough rather than altering the live puzzle or requiring the player to complete a second game.
+- [x] Decide first-visit behavior: open the tutorial automatically when its first-party functional cookie is absent.
+- [x] Decide dismissal behavior: closing, skipping, or completing the tutorial records the cookie so later visits are not interrupted.
+- [x] Decide replay behavior: keep a permanent How to play control that reopens the tutorial at its first step without clearing or changing the active puzzle.
+- [ ] Curate an example board using familiar words and a clear suboptimal solution, ideally 5 words against a Perfect score of 4.
+- [ ] Validate every demonstrated word and path against `data/dictionary.txt`, and use the existing exact solver to verify the example's stated Perfect score against the full dictionary.
+- [ ] Introduce the objective: cover all 25 tiles by submitting valid words.
+- [ ] Tell players explicitly that SpellSweep uses the North American Scrabble dictionary.
+- [ ] Demonstrate tile-selection order and adjacent horizontal and vertical movement.
+- [ ] Demonstrate a diagonal move clearly enough that it cannot be mistaken for an orthogonal path.
+- [ ] Explain that a tile cannot be repeated within one word.
+- [ ] Demonstrate reusing an already-covered tile in a later word.
+- [ ] Demonstrate submitting the same word again, preferably along a different path that adds useful coverage, and explain that every accepted submission increases the score.
 - [ ] Demonstrate entering a letter for the center wildcard and explain that it may represent a different letter in each word.
-- [ ] Explain covered and uncovered tile states, word-count scoring, Perfect, Par, and the consequence of Reveal Answer.
-- [ ] Keep the tutorial concise, keyboard accessible, touch friendly, and available to replay.
-- [ ] Verify the tutorial on desktop, touchscreen laptop, and phone without changing the tested game rules.
+- [ ] Show the example player completing the board with a valid but suboptimal word count.
+- [ ] Compare the example result with Perfect and Par, reinforcing that the score is accepted words used and lower is better.
+- [ ] Reveal the missed shorter path and visually distinguish the unnecessary word or path that caused the gap from Perfect.
+- [ ] Explain covered and uncovered tile states and the consequence of using Reveal Answer before the puzzle is complete.
+- [ ] Finish with a brief rules recap and a clear Let’s play action.
+- [ ] Add Back, Next, close, current-step text, and compact progress indicators.
+- [ ] Keep tutorial rendering independent of the active `GameState` so opening, navigating, or dismissing it cannot change the current board, coverage, or score.
+- [ ] Implement the walkthrough directly with the existing HTML, CSS, and TypeScript; add no onboarding framework or runtime dependency.
+- [ ] Make the dialog keyboard accessible, announce step changes appropriately, preserve sensible focus, and support Escape dismissal.
+- [ ] Keep controls touch friendly and make the tutorial board and copy fit or scroll cleanly on phone-sized screens.
+- [ ] Test first-visit automatic display, all dismissal routes, cookie persistence across reloads, and manual replay from step one.
+- [ ] Verify the walkthrough and its unchanged live-game state on desktop, touchscreen laptop, and phone.
 
 Prefer a small in-page walkthrough built with the existing HTML, CSS, and TypeScript. Do not add an onboarding framework or dependency.
 
-Completion criteria: a first-time player can understand and begin playing SpellSweep without outside instructions, and an experienced player can skip or reopen the tutorial easily.
+Completion criteria: a first-time player is automatically shown a concise walkthrough that explains the North American Scrabble dictionary, movement, reuse, wildcard, scoring, and optimization rules; dismissal persists across later visits; and any player can reopen the tutorial without affecting an active puzzle.
 
 ## Milestone 18: GoatCounter Analytics
 
@@ -328,7 +348,7 @@ Completion criteria: a first-time player can understand and begin playing SpellS
 - [ ] Verify production page-view counting on GitHub Pages.
 - [ ] Verify the Share Result event is counted once per button activation on desktop and mobile.
 
-Keep this limited to aggregate page visits and Share Result button activations. Do not add a tag manager, analytics framework, cookies, user accounts, or broader behavioral tracking.
+Keep analytics limited to aggregate page visits and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The separate first-party functional cookie required by Milestone 17 stores only whether the tutorial has already been shown and must not be sent to GoatCounter.
 
 Completion criteria: GoatCounter reports public-site visits and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those two aggregate events.
 
