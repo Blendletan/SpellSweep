@@ -162,18 +162,16 @@ Plain text satisfies the current rule allowing either text or a graphic. A graph
 
 Completion criteria: a finished or surrendered game can produce the correct share text and webpage link through an available browser mechanism.
 
-## Milestone 10: Playtesting and Rule Review
+## Milestone 10: Initial Playtesting Checkpoint
 
-- [ ] Play multiple debug-mode boards.
-- [ ] Record typical completion times and word counts.
-- [ ] Evaluate whether boards are solvable in practice, not merely in theory.
-- [ ] Evaluate whether wildcard behavior and path correction are understandable.
-- [ ] Identify reliance on obscure dictionary words.
-- [ ] Revise rules or interaction directly when playtesting supports a change.
+- [x] Confirm that a complete debug-mode game can be played.
+- [x] Evaluate whether the core rules are enjoyable enough to continue.
+- [x] Record the first important playtesting observation.
+- [x] Decide whether to proceed to deployment and broader testing.
 
-Initial playtest checkpoint (September 9, 2026): the project owner reports that the game is difficult but fun and approved proceeding. Keep this milestone open for broader difficulty, score, interaction, and dictionary-word observations during continued playtesting.
+Initial result (September 9, 2026): the project owner reports that the game is difficult but fun and approved proceeding. Broader difficulty, score, interaction, dictionary-word, touch, and device observations move to Milestone 13 so they can be gathered from the deployed build.
 
-Completion criteria: there is enough playtest evidence to judge whether the core game is enjoyable and where its actual friction lies.
+Completion criteria: the prototype demonstrates enough enjoyment to justify broader device testing. Complete.
 
 ## Milestone 11: Performance Review
 
@@ -187,25 +185,59 @@ Measured September 9, 2026 across 10 deterministic boards: dictionary read 4.83 
 
 Completion criteria: the game performs acceptably on its intended browsers, or a measured bottleneck has a focused solution.
 
-## Milestone 12: Visual, Mobile, and Accessibility Polish
+## Milestone 12: Prototype GitHub Pages Deployment
 
-- [ ] Improve typography, spacing, and board appearance.
-- [ ] Refine feedback and restrained animations where useful.
-- [ ] Verify responsive layout and touch interaction.
-- [ ] Add keyboard support and visible focus states.
+- [ ] Confirm the GitHub repository, default branch, and intended Pages URL.
+- [ ] Add the smallest practical GitHub Pages workflow.
+- [ ] Install dependencies with the committed lockfile and compile TypeScript in the workflow.
+- [ ] Assemble a static artifact containing `index.html`, `style.css`, `build/`, and `data/dictionary.txt` without committing generated build output.
+- [ ] Keep `DAILY_MODE = false` for this playtesting deployment.
+- [ ] Push the reviewed source and workflow to GitHub only after explicit approval.
+- [ ] Enable or verify GitHub Pages using the workflow artifact.
+- [ ] Verify that the public site loads its JavaScript, stylesheet, and dictionary from the repository's Pages base path.
+- [ ] Smoke-test ordinary words, wildcard words, Reveal Answer, solution paths, and sharing on the deployed URL.
+- [ ] Confirm that the deployed prototype has no backend dependency.
+
+This is a playtesting deployment, not the final launch. Its purpose is to make the real HTTPS build available across devices before interaction and visual decisions are finalized.
+
+Completion criteria: the current prototype is playable from its GitHub Pages URL and is ready for cross-device testing.
+
+## Milestone 13: Cross-Device Playtesting and Rule Review
+
+- [ ] Play multiple debug-mode boards on a desktop computer.
+- [ ] Play on a touchscreen laptop and evaluate touch selection and wildcard entry.
+- [ ] Play on a phone and evaluate layout, text size, controls, scrolling, and touch behavior.
+- [ ] Test Reveal Answer cancellation, confirmation, minimum-solution display, and path inspection on each relevant device.
+- [ ] Test native sharing or its fallback on desktop and mobile.
+- [ ] Record typical completion times and word counts.
+- [ ] Evaluate whether boards are solvable in practice, not merely in theory.
+- [ ] Record whether difficulty comes from the rules, generated letters, obscure dictionary words, or interaction friction.
+- [ ] Record accessibility and keyboard issues observed during real use.
+- [ ] Decide which findings require rule changes and which require interface changes.
+
+Completion criteria: there is enough evidence from desktop, touchscreen, and phone use to make targeted changes without guessing.
+
+## Milestone 14: Interaction, Mobile, and Accessibility Corrections
+
+- [ ] Fix interaction problems demonstrated by cross-device playtesting.
+- [ ] Adjust mobile layout and touch behavior where testing shows a need.
+- [ ] Add or refine keyboard support and visible focus states.
 - [ ] Add useful accessible labels and non-color-only state indicators.
+- [ ] Re-run rule tests and targeted device checks after each meaningful correction.
 
-Completion criteria: the stabilized game is attractive and usable on desktop and mobile without changing its rules.
+Completion criteria: the tested interaction works reliably across the target devices without changing game rules unintentionally.
 
-## Milestone 13: Static Deployment Verification
+## Milestone 15: Final Visual Polish and Deployment Verification
 
-- [ ] Produce a static production build suitable for GitHub Pages.
-- [ ] Verify relative paths under the repository's Pages base path.
-- [ ] Verify that dictionary and puzzle assets are included.
-- [ ] Confirm that the deployed game has no backend dependency.
-- [ ] Verify daily-mode behavior in the deployed build.
+- [ ] Improve typography, spacing, and board appearance after interaction stabilizes.
+- [ ] Refine feedback and restrained animations where useful.
+- [ ] Produce and test the final static build.
+- [ ] Verify relative paths and required assets on GitHub Pages.
+- [ ] Set the intended release value of `DAILY_MODE`.
+- [ ] Re-test daily puzzle persistence and local-midnight behavior when daily mode is enabled.
+- [ ] Verify the final deployed game on desktop and mobile.
 
-Completion criteria: SpellSweep can be loaded and played correctly as a static GitHub Pages site.
+Completion criteria: the stabilized game is attractive, accessible, and verified on its final static GitHub Pages deployment.
 
 ## Ongoing Constraints
 
