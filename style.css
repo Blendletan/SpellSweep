@@ -138,6 +138,59 @@ button:disabled {
   color: #176b35;
 }
 
-.new-puzzle {
+.reveal-answer,
+.new-puzzle,
+#share-result {
   margin-top: 0.5rem;
+}
+
+.revealed-answer {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid #9ca3af;
+  border-radius: 0.4rem;
+  background: white;
+}
+
+.revealed-answer h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+}
+
+.revealed-answer p {
+  margin: 0.35rem 0;
+}
+
+.answer-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.answer-word.active {
+  border-color: #205cc5;
+  background: #dbeafe;
+  font-weight: 700;
+}
+
+.answer-help {
+  font-size: 0.9rem;
+}
+
+.reveal-warning {
+  max-width: min(24rem, calc(100% - 2rem));
+  padding: 1.25rem;
+  border: 1px solid #6b7280;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.reveal-warning::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.reveal-warning h2 {
+  margin-top: 0;
 }

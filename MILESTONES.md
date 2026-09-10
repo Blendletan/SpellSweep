@@ -20,7 +20,7 @@ Do not skip ahead to architecture, optimization, or visual polish. Keep the impl
 - [x] Confirm that `data/dictionary.txt` has the expected format and is the only authoritative dictionary.
 - [x] Decide the initial value of `DAILY_MODE`.
 
-Decision needed: `AGENTS.md` illustrates `const DAILY_MODE = false`, while `GAME-RULES.md` illustrates `const DAILY_MODE = true`. Treat `GAME-RULES.md` as the intended release default unless the project owner chooses development mode initially.
+Decision: keep `DAILY_MODE = false` during development and playtesting. Enabling it for release remains a one-line change to the same boolean.
 
 Completion criteria: the existing project is understood well enough to make focused changes without introducing unnecessary structure or overwriting unrelated work.
 
@@ -69,7 +69,7 @@ Completion criteria: tested state transitions preserve monotonic coverage and ca
 - [x] Record the tiles covered by all valid word paths.
 - [x] Declare a board solvable only when every tile occurs in at least one valid path.
 
-Because words may overlap and tiles are never consumed, it is not necessary to find a partition or simulate a sequence of moves. A board is solvable when the union of its valid word paths covers all 25 tiles.
+Because words may overlap and tiles are never consumed, it is not necessary to find a partition or simulate a sequence of moves merely to determine solvability. A board is solvable when the union of its valid word paths covers all 25 tiles. Milestone 8 separately finds an exact minimum-word solution for the Reveal Answer feature.
 
 Test cases should include overlapping solutions, an uncoverable tile, a tile coverable only through the wildcard, multiple wildcard interpretations, and attempted tile reuse within one path.
 
@@ -127,7 +127,42 @@ Use ordinary HTML, CSS, and TypeScript. The UI should call the tested game logic
 
 Completion criteria: a person can complete a puzzle and understand the essential game state without developer tools.
 
-## Milestone 8: Playtesting and Rule Review
+## Milestone 8: Reveal Answer and Minimum-Word Solution
+
+- [x] Extend the board search to retain concrete valid words and their tile paths.
+- [x] Remove duplicate solution candidates that represent the same word and path.
+- [x] Find an exact covering solution that uses the minimum possible number of word paths.
+- [x] Make minimum-solution selection deterministic when several equally short solutions exist.
+- [x] Verify that every revealed path is legal, every revealed word is in the dictionary, and the combined paths cover all 25 tiles.
+- [x] Add a simple gave-up outcome to the game state.
+- [x] Freeze elapsed time and accepted-word count at the moment the player gives up.
+- [x] Prevent further word submissions after giving up.
+- [x] Add a Reveal Answer button.
+- [x] Warn the player that revealing the answer will end the run and require confirmation before continuing.
+- [x] Leave the game unchanged when the warning is cancelled.
+- [x] Display every word in the minimum-word solution after confirmation.
+- [x] Let the player select a revealed word to highlight its exact path on the board.
+- [x] Add focused tests for minimum cardinality, deterministic tie handling, frozen results, cancelled reveals, and complete path coverage.
+
+The revealed answer must be an exact minimum-word solution, not a greedy approximation. A direct exact search with pruning is preferred. Measure it against real generated boards while implementing it; if exact solving is too slow for interactive use, stop and discuss the measured problem before introducing a worker or more elaborate optimization.
+
+Completion criteria: after a warning and confirmation, Reveal Answer immediately ends the run, freezes its counters, and shows a verified solution using the fewest possible words with inspectable tile paths.
+
+## Milestone 9: Score Sharing
+
+- [x] Make sharing available only after the player wins or gives up.
+- [x] For a win, create share text containing the accepted-word count, elapsed time, and webpage link.
+- [x] For a revealed answer, create share text containing “This one beat me!” and the webpage link instead of the score.
+- [x] Use the browser's native text-sharing function when available.
+- [x] Fall back to copying the same text to the clipboard when native sharing is unavailable.
+- [x] Give clear success or failure feedback without adding a sharing framework or graphics dependency.
+- [x] Test both completed-game and gave-up share content.
+
+Plain text satisfies the current rule allowing either text or a graphic. A graphic share card can be considered later only if playtesting shows a present need.
+
+Completion criteria: a finished or surrendered game can produce the correct share text and webpage link through an available browser mechanism.
+
+## Milestone 10: Playtesting and Rule Review
 
 - [ ] Play multiple debug-mode boards.
 - [ ] Record typical completion times and word counts.
@@ -138,7 +173,7 @@ Completion criteria: a person can complete a puzzle and understand the essential
 
 Completion criteria: there is enough playtest evidence to judge whether the core game is enjoyable and where its actual friction lies.
 
-## Milestone 9: Performance Review
+## Milestone 11: Performance Review
 
 - [ ] Measure dictionary loading time.
 - [ ] Measure valid-path and solvability search time.
@@ -148,7 +183,7 @@ Completion criteria: there is enough playtest evidence to judge whether the core
 
 Completion criteria: the game performs acceptably on its intended browsers, or a measured bottleneck has a focused solution.
 
-## Milestone 10: Visual, Mobile, and Accessibility Polish
+## Milestone 12: Visual, Mobile, and Accessibility Polish
 
 - [ ] Improve typography, spacing, and board appearance.
 - [ ] Refine feedback and restrained animations where useful.
@@ -158,7 +193,7 @@ Completion criteria: the game performs acceptably on its intended browsers, or a
 
 Completion criteria: the stabilized game is attractive and usable on desktop and mobile without changing its rules.
 
-## Milestone 11: Static Deployment Verification
+## Milestone 13: Static Deployment Verification
 
 - [ ] Produce a static production build suitable for GitHub Pages.
 - [ ] Verify relative paths under the repository's Pages base path.

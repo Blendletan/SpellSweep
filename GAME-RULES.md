@@ -162,6 +162,28 @@ Lower word count is desirable, and time provides an additional measure of perfor
 
 ---
 
+# Giving up
+
+The player should have the option to give up by pressing a reveal answer button
+
+If they do so the timer and number of words used should both freeze
+
+The game should then tell the player a valid solution
+
+---
+
+# Sharing
+
+The game should include an option to share their score once the game is completed, or the player has given up
+
+The share option should be available as either a text or a graphic that they can share
+
+In either case it should include the scores and a link to the webpage the game is located at
+
+If the player gave up and revealed the solution then the share card should say "This one beat me!" instead of the time and number of words used
+
+---
+
 # No Undo and No Softlocks
 
 There is deliberately no undo system for accepted words.

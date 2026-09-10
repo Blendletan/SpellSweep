@@ -7,16 +7,21 @@ import {
   createDictionaryIndex,
   createGame,
   elapsedMilliseconds,
+  findMinimumWordSolution,
   generateCandidateBoard,
+  giveUp,
+  isGameOver,
   isSolvableBoard,
   isValidPath,
   isValidWord,
   localDateKey,
+  minimumWordCover,
   parseDictionary,
   pathPattern,
   playableCoverage,
   seededRandom,
   selectPuzzle,
+  shareText,
   submitWord,
   WILDCARD_INDEX,
 } from "./game.ts";
@@ -147,6 +152,21 @@ test("elapsed time cannot be negative", () => {
   assert.equal(elapsedMilliseconds(createGame(boardWith(), 500), 400), 0);
 });
 
+test("giving up freezes the game without changing its score", () => {
+  const playing = createGame(boardWith(), 100);
+  const gaveUp = giveUp(playing, 475);
+
+  assert.equal(gaveUp.gaveUpAt, 475);
+  assert.equal(gaveUp.wordsUsed, 0);
+  assert.equal(elapsedMilliseconds(gaveUp, 900), 375);
+  assert.equal(isGameOver(gaveUp), true);
+
+  const submission = submitWord(gaveUp, [0, 1], "aa", new Set(["aa"]), 500);
+  assert.equal(submission.accepted, false);
+  assert.equal(submission.state, gaveUp);
+  assert.equal(giveUp(gaveUp, 600), gaveUp);
+});
+
 test("solvability is the union of overlapping valid word paths", () => {
   const dictionary = createDictionaryIndex(new Set(["aa"]));
   assert.equal(isSolvableBoard(boardWith(), dictionary), true);
@@ -221,4 +241,78 @@ test("daily selection is stable while debug selection uses its random source", (
 
   assert.deepEqual(dailyFirst, dailySecond);
   assert.notDeepEqual(debugFirst, debugSecond);
+});
+
+test("minimum cover uses fewer words than a greedy choice when necessary", () => {
+  const greedyTrap = {
+    word: "aaaaaaaaaaaaaaa",
+    path: Array.from({ length: 15 }, (_, index) => index),
+  };
+  const optimalFirst = {
+    word: "bbbbbbbbbbbbbbb",
+    path: [...Array.from({ length: 8 }, (_, index) => index), ...Array.from({ length: 7 }, (_, index) => index + 15)],
+  };
+  const optimalSecond = {
+    word: "cccccccccc",
+    path: [...Array.from({ length: 7 }, (_, index) => index + 8), 22, 23, 24],
+  };
+
+  const solution = minimumWordCover([greedyTrap, optimalFirst, optimalSecond]);
+  assert.deepEqual(solution, [optimalFirst, optimalSecond]);
+});
+
+test("minimum cover tie handling is deterministic", () => {
+  const firstHalf = { word: "alpha", path: Array.from({ length: 13 }, (_, index) => index) };
+  const secondHalf = { word: "beta", path: Array.from({ length: 12 }, (_, index) => index + 13) };
+  const alternateFirst = { word: "gamma", path: [...Array.from({ length: 10 }, (_, index) => index), 20, 21, 22] };
+  const alternateSecond = { word: "omega", path: [...Array.from({ length: 10 }, (_, index) => index + 10), 23, 24] };
+  const candidates = [alternateSecond, secondHalf, alternateFirst, firstHalf];
+
+  assert.deepEqual(
+    minimumWordCover(candidates),
+    minimumWordCover([...candidates].reverse()),
+  );
+});
+
+test("minimum solution returns legal paths covering the full board", () => {
+  const snakePath = [
+    0, 1, 2, 3, 4, 9, 8, 7, 6, 5, 10, 11, 12, 13, 14, 19, 18, 17, 16,
+    15, 20, 21, 22, 23, 24,
+  ];
+  const board = boardWith();
+  const letters = "abcdefghijklmnopqrstuvwxy";
+  snakePath.forEach((tileIndex, letterIndex) => {
+    board[tileIndex] = tileIndex === WILDCARD_INDEX ? "?" : letters[letterIndex];
+  });
+  const dictionary = createDictionaryIndex(
+    new Set(["abcdefghijklmno", "pqrstuvwxy"]),
+  );
+  const solution = findMinimumWordSolution(board, dictionary);
+  const covered = new Set(solution.flatMap(({ path }) => path));
+
+  assert.equal(solution.length, 2);
+  assert.equal(covered.size, 25);
+  for (const { word, path } of solution) {
+    assert.equal(isValidWord(board, path, word, dictionary.words), true);
+  }
+});
+
+test("share text reflects a win or a revealed answer", () => {
+  const pageUrl = "https://example.com/spellsweep/";
+  const won = {
+    ...createGame(boardWith(), 100),
+    wordsUsed: 4,
+    completedAt: 125_100,
+  };
+  const lost = giveUp(createGame(boardWith(), 100), 125_100);
+
+  assert.equal(
+    shareText(won, pageUrl),
+    `SpellSweep\n4 words in 2:05\n${pageUrl}`,
+  );
+  assert.equal(
+    shareText(lost, pageUrl),
+    `SpellSweep\nThis one beat me!\n${pageUrl}`,
+  );
+  assert.throws(() => shareText(createGame(boardWith()), pageUrl));
 });
