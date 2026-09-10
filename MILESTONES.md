@@ -187,20 +187,22 @@ Completion criteria: the game performs acceptably on its intended browsers, or a
 
 ## Milestone 12: Prototype GitHub Pages Deployment
 
-- [ ] Confirm the GitHub repository, default branch, and intended Pages URL.
-- [ ] Add the smallest practical GitHub Pages workflow.
-- [ ] Install dependencies with the committed lockfile and compile TypeScript in the workflow.
-- [ ] Assemble a static artifact containing `index.html`, `style.css`, `build/`, and `data/dictionary.txt` without committing generated build output.
-- [ ] Keep `DAILY_MODE = false` for this playtesting deployment.
-- [ ] Push the reviewed source and workflow to GitHub only after explicit approval.
-- [ ] Enable or verify GitHub Pages using the workflow artifact.
-- [ ] Verify that the public site loads its JavaScript, stylesheet, and dictionary from the repository's Pages base path.
-- [ ] Smoke-test ordinary words, wildcard words, Reveal Answer, solution paths, and sharing on the deployed URL.
-- [ ] Confirm that the deployed prototype has no backend dependency.
+- [x] Confirm the GitHub repository, default branch, and intended Pages URL.
+- [x] Add the smallest practical GitHub Pages workflow.
+- [x] Install dependencies with the committed lockfile and compile TypeScript in the workflow.
+- [x] Assemble a static artifact containing `index.html`, `style.css`, `build/`, and `data/dictionary.txt` without committing generated build output.
+- [x] Keep `DAILY_MODE = false` for this playtesting deployment.
+- [x] Push the reviewed source and workflow to GitHub only after explicit approval.
+- [x] Enable or verify GitHub Pages using the workflow artifact.
+- [x] Verify that the public site loads its JavaScript, stylesheet, and dictionary from the repository's Pages base path.
+- [x] Smoke-test ordinary words, wildcard words, Reveal Answer, solution paths, and sharing on the deployed URL.
+- [x] Confirm that the deployed prototype has no backend dependency.
 
 This is a playtesting deployment, not the final launch. Its purpose is to make the real HTTPS build available across devices before interaction and visual decisions are finalized.
 
-Completion criteria: the current prototype is playable from its GitHub Pages URL and is ready for cross-device testing.
+Deployment result (September 9, 2026): commit `2f02ce1` deployed successfully to `https://blendletan.github.io/SpellSweep/` through GitHub Actions. The public build loaded its static assets and dictionary, accepted an ordinary word and a wildcard word, preserved the active run when the Reveal Answer warning was cancelled, froze the result after confirmation, displayed and navigated the exact minimum-word solution paths, and exposed the post-game Share Result control. The existing automated tests also verify the completed-game and gave-up share text. No backend is used.
+
+Completion criteria: the current prototype is playable from its GitHub Pages URL and is ready for cross-device testing. Complete.
 
 ## Milestone 13: Cross-Device Playtesting and Rule Review
 
