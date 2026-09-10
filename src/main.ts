@@ -2,15 +2,12 @@ import {
   areAdjacent,
   createDictionaryIndex,
   createGame,
-  elapsedMilliseconds,
   findMinimumWordSolution,
   giveUp,
   isGameOver,
-  isGamePaused,
   localDateKey,
-  pauseGame,
+  PAR_MARGIN,
   parseDictionary,
-  resumeGame,
   selectPuzzle,
   shareText,
   submitWord,
@@ -23,11 +20,10 @@ import {
 const DAILY_MODE = false;
 
 const boardElement = requiredElement<HTMLDivElement>("board");
-const wordsUsedElement = requiredElement<HTMLElement>("words-used");
+const scoreElement = requiredElement<HTMLElement>("score-value");
+const perfectElement = requiredElement<HTMLElement>("perfect-score");
+const parElement = requiredElement<HTMLElement>("par-score");
 const coveredCountElement = requiredElement<HTMLElement>("covered-count");
-const elapsedTimeElement = requiredElement<HTMLElement>("elapsed-time");
-const pauseButton = requiredElement<HTMLButtonElement>("pause-game");
-const pauseCover = requiredElement<HTMLDivElement>("pause-cover");
 const currentWordElement = requiredElement<HTMLDivElement>("current-word");
 const wildcardControl = requiredElement<HTMLLabelElement>("wildcard-control");
 const wildcardInput = requiredElement<HTMLInputElement>("wildcard-letter");
@@ -47,14 +43,13 @@ const confirmRevealButton = requiredElement<HTMLButtonElement>("confirm-reveal")
 let dictionary: DictionaryIndex;
 let game: GameState;
 let selectedPath: number[] = [];
-let revealedSolution: readonly WordPath[] = [];
+let minimumSolution: readonly WordPath[] = [];
+let answerRevealed = false;
 let selectedAnswerIndex = 0;
 let activeDateKey = localDateKey(new Date());
-let pauseCause: "manual" | "visibility" | null = null;
 
 submitButton.addEventListener("click", submitSelection);
 clearButton.addEventListener("click", clearSelection);
-pauseButton.addEventListener("click", toggleManualPause);
 newPuzzleButton.addEventListener("click", () => startPuzzle());
 revealAnswerButton.addEventListener("click", requestRevealAnswer);
 cancelRevealButton.addEventListener("click", () => {
@@ -74,10 +69,9 @@ wildcardInput.addEventListener("input", () => {
   renderSelection();
 });
 document.addEventListener("keydown", handleKeyDown);
-document.addEventListener("visibilitychange", handleVisibilityChange);
 
 void loadGame();
-setInterval(updateClock, 250);
+setInterval(checkForNewDailyPuzzle, 30_000);
 
 async function loadGame(): Promise<void> {
   try {
@@ -90,7 +84,6 @@ async function loadGame(): Promise<void> {
     startPuzzle();
     newPuzzleButton.disabled = false;
     revealAnswerButton.disabled = false;
-    pauseButton.disabled = false;
     newPuzzleButton.textContent = DAILY_MODE ? "Restart today's puzzle" : "New puzzle";
   } catch (error) {
     console.error(error);
@@ -101,14 +94,10 @@ async function loadGame(): Promise<void> {
 function startPuzzle(): void {
   game = createGame(selectPuzzle(dictionary, DAILY_MODE));
   selectedPath = [];
-  revealedSolution = [];
+  minimumSolution = findMinimumWordSolution(game.board, dictionary);
+  answerRevealed = false;
   selectedAnswerIndex = 0;
-  pauseCause = null;
   wildcardInput.value = "";
-  if (document.hidden) {
-    game = pauseGame(game);
-    pauseCause = "visibility";
-  }
   activeDateKey = localDateKey(new Date());
   render();
   showMessage(
@@ -147,42 +136,6 @@ function clearSelection(): void {
   wildcardInput.value = "";
   showMessage("Selection cleared.", "neutral");
   render();
-}
-
-function toggleManualPause(): void {
-  if (isGameOver(game)) {
-    return;
-  }
-
-  if (isGamePaused(game)) {
-    game = resumeGame(game);
-    pauseCause = null;
-    showMessage("Game resumed.", "neutral");
-  } else {
-    game = pauseGame(game);
-    pauseCause = "manual";
-    showMessage("Game paused.", "neutral");
-  }
-  render();
-}
-
-function handleVisibilityChange(): void {
-  if (!game || isGameOver(game)) {
-    return;
-  }
-
-  if (document.hidden) {
-    if (!isGamePaused(game)) {
-      game = pauseGame(game);
-      pauseCause = "visibility";
-      render();
-    }
-  } else if (pauseCause === "visibility" && isGamePaused(game)) {
-    game = resumeGame(game);
-    pauseCause = null;
-    render();
-    showMessage("Game resumed.", "neutral");
-  }
 }
 
 function handleKeyDown(event: KeyboardEvent): void {
@@ -227,9 +180,10 @@ function submitSelection(): void {
   selectedPath = [];
   wildcardInput.value = "";
 
-  if (game.completedAt !== null) {
+  if (game.completed) {
+    const perfect = minimumSolution.length;
     showMessage(
-      `Complete in ${game.wordsUsed} words and ${formatElapsed(elapsedMilliseconds(game))}!`,
+      `Complete with a score of ${game.wordsUsed}. Perfect is ${perfect}; par is ${perfect + PAR_MARGIN}.`,
       "success",
     );
   } else {
@@ -240,47 +194,35 @@ function submitSelection(): void {
 }
 
 function requestRevealAnswer(): void {
-  if (
-    game.gaveUpAt !== null ||
-    isGamePaused(game) ||
-    revealedSolution.length > 0
-  ) {
+  if (game.gaveUp || answerRevealed) {
     return;
   }
 
-  if (game.completedAt !== null) {
-    void revealAnswer();
+  if (game.completed) {
+    revealAnswer();
   } else {
     revealWarningDialog.showModal();
   }
 }
 
-async function revealAnswer(): Promise<void> {
-  if (
-    game.gaveUpAt !== null ||
-    isGamePaused(game) ||
-    revealedSolution.length > 0
-  ) {
+function revealAnswer(): void {
+  if (game.gaveUp || answerRevealed) {
     return;
   }
 
-  const completedBeforeReveal = game.completedAt !== null;
+  const completedBeforeReveal = game.completed;
   if (!completedBeforeReveal) {
     game = giveUp(game);
   }
   selectedPath = [];
   wildcardInput.value = "";
-  render();
-  showMessage("Finding the minimum-word solution…", "neutral");
-
-  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-  revealedSolution = findMinimumWordSolution(game.board, dictionary);
+  answerRevealed = true;
   selectedAnswerIndex = 0;
   render();
   showMessage(
     completedBeforeReveal
       ? "Answer revealed. Your winning result is unchanged."
-      : "Answer revealed. Your score and timer are frozen.",
+      : "Answer revealed. Your score is frozen.",
     "neutral",
   );
 }
@@ -325,10 +267,8 @@ function selectedWord(): string {
 }
 
 function render(): void {
-  const answerPath = game.gaveUpAt === null
-    ? []
-    : (revealedSolution[selectedAnswerIndex]?.path ?? []);
-  const displayedPath = game.gaveUpAt === null ? selectedPath : answerPath;
+  const answerPath = minimumSolution[selectedAnswerIndex]?.path ?? [];
+  const displayedPath = answerRevealed ? answerPath : selectedPath;
 
   boardElement.replaceChildren(
     ...game.board.map((tile, tileIndex) => {
@@ -340,7 +280,7 @@ function render(): void {
       button.classList.toggle("wildcard", tile === WILDCARD);
       button.classList.toggle("covered", game.covered[tileIndex]);
       button.classList.toggle("selected", selectedPosition !== -1);
-      button.disabled = isGameOver(game) || isGamePaused(game);
+      button.disabled = isGameOver(game);
       button.setAttribute("aria-pressed", String(selectedPosition !== -1));
       button.setAttribute(
         "aria-label",
@@ -348,7 +288,7 @@ function render(): void {
           game.covered[tileIndex] ? ", covered" : ", uncovered"
         }${
           selectedPosition !== -1
-            ? game.gaveUpAt === null
+            ? !answerRevealed
               ? `, selection ${selectedPosition + 1}`
               : `, revealed path ${selectedPosition + 1}`
             : ""
@@ -359,42 +299,29 @@ function render(): void {
     }),
   );
 
-  wordsUsedElement.textContent = String(game.wordsUsed);
+  scoreElement.textContent = String(game.wordsUsed);
+  perfectElement.textContent = String(minimumSolution.length);
+  parElement.textContent = String(minimumSolution.length + PAR_MARGIN);
   coveredCountElement.textContent = String(game.covered.filter(Boolean).length);
-  const paused = isGamePaused(game);
-  pauseButton.disabled = isGameOver(game);
-  pauseButton.textContent = paused ? "Resume" : "Pause";
-  pauseCover.hidden = !paused;
-  boardElement.setAttribute("aria-hidden", String(paused));
-  revealAnswerButton.disabled =
-    paused || game.gaveUpAt !== null || revealedSolution.length > 0;
+  revealAnswerButton.disabled = game.gaveUp || answerRevealed;
   shareResultButton.hidden = !isGameOver(game);
   renderAnswer();
   renderSelection();
-  updateClock();
 }
 
 function renderSelection(): void {
-  if (game.gaveUpAt !== null) {
+  if (answerRevealed) {
     wildcardControl.hidden = true;
     currentWordElement.textContent =
-      revealedSolution[selectedAnswerIndex]?.word.toUpperCase() ?? "Answer revealed";
+      minimumSolution[selectedAnswerIndex]?.word.toUpperCase() ?? "Answer revealed";
     clearButton.disabled = true;
     submitButton.disabled = true;
     return;
   }
 
-  if (game.completedAt !== null) {
+  if (game.completed) {
     wildcardControl.hidden = true;
     currentWordElement.textContent = "Puzzle complete";
-    clearButton.disabled = true;
-    submitButton.disabled = true;
-    return;
-  }
-
-  if (isGamePaused(game)) {
-    wildcardControl.hidden = true;
-    currentWordElement.textContent = "Game paused";
     clearButton.disabled = true;
     submitButton.disabled = true;
     return;
@@ -418,17 +345,17 @@ function renderSelection(): void {
 }
 
 function renderAnswer(): void {
-  revealedAnswerElement.hidden = revealedSolution.length === 0;
-  if (revealedSolution.length === 0) {
+  revealedAnswerElement.hidden = !answerRevealed;
+  if (!answerRevealed) {
     answerWordsElement.replaceChildren();
     return;
   }
 
-  answerSummaryElement.textContent = `${revealedSolution.length} ${
-    revealedSolution.length === 1 ? "word" : "words"
+  answerSummaryElement.textContent = `${minimumSolution.length} ${
+    minimumSolution.length === 1 ? "word" : "words"
   } cover all 25 tiles.`;
   answerWordsElement.replaceChildren(
-    ...revealedSolution.map(({ word }, index) => {
+    ...minimumSolution.map(({ word }, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "answer-word";
@@ -444,24 +371,15 @@ function renderAnswer(): void {
   );
 }
 
-function updateClock(): void {
+function checkForNewDailyPuzzle(): void {
   if (!game) {
     return;
   }
-
-  elapsedTimeElement.textContent = formatElapsed(elapsedMilliseconds(game));
 
   if (DAILY_MODE && localDateKey(new Date()) !== activeDateKey) {
     startPuzzle();
     showMessage("A new daily puzzle has begun.", "neutral");
   }
-}
-
-function formatElapsed(milliseconds: number): string {
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${minutes}:${seconds}`;
 }
 
 function showMessage(

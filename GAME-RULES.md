@@ -8,10 +8,14 @@ The goal is to cover all 25 tiles by finding valid words on the board.
 
 Words are formed by tracing paths through adjacent tiles. Tiles may be reused in different words, so playing a word never removes tiles or prevents them from being used later.
 
-The player is scored by:
+The player's score is the **number of accepted words used**. Lower scores are better.
 
-- **number of words used**
-- **time taken**
+Each puzzle also displays two reference scores:
+
+- **Perfect** is the minimum number of valid word paths whose combined coverage includes all 25 tiles.
+- **Par** is currently Perfect plus 3.
+
+Perfect is an exact optimum, not an estimate. If the smallest possible solution uses 5 words, Perfect is 5 and Par is 8.
 
 The puzzle ends immediately when every tile has been covered by at least one accepted word.
 
@@ -141,26 +145,9 @@ It:
 - does not cover any tiles;
 - does not remove or change previous progress.
 
-The only penalty is the time the player spent attempting it.
+An invalid submission has no score penalty.
 
 The interface must clearly tell the player that the word is not in the dictionary, then clear the selected path and any wildcard entry so a new word can be started immediately.
-
----
-
-# Pausing
-
-The player may pause an active puzzle manually.
-
-While paused:
-
-- the puzzle is covered so its letters cannot be studied;
-- the elapsed timer does not advance;
-- word selection and submission are unavailable;
-- the player may resume using the same pause control.
-
-Switching away from the browser tab pauses an active puzzle automatically. Returning to that tab resumes it automatically only when switching away caused the pause. A game that the player paused manually must remain paused after switching tabs until the player explicitly resumes it.
-
-Pausing is unavailable after the puzzle has been solved or the player has given up.
 
 ---
 
@@ -172,12 +159,7 @@ The player does not need to use every accepted word efficiently.
 
 There is no requirement that the winning words be disjoint.
 
-The final result records at least:
-
-- total number of accepted words used;
-- total elapsed time.
-
-Lower word count is desirable, and time provides an additional measure of performance.
+The final result is the total number of accepted words used. The result should be shown alongside the puzzle's Perfect and Par values so the player can compare their score with both targets.
 
 ---
 
@@ -185,11 +167,11 @@ Lower word count is desirable, and time provides an additional measure of perfor
 
 The player should have the option to give up by pressing a reveal answer button
 
-If they do so the timer and number of words used should both freeze
+If they do so the number of words used should freeze
 
 The game should then tell the player a valid solution
 
-After a puzzle has already been solved, the Reveal Answer button remains available and may show the same solution without changing the completed score, elapsed time, or outcome. Revealing after a win does not turn the result into a surrender.
+After a puzzle has already been solved, the Reveal Answer button remains available and may show the same solution without changing the completed score or outcome. Revealing after a win does not turn the result into a surrender.
 
 ---
 
@@ -199,9 +181,9 @@ The game should include an option to share their score once the game is complete
 
 The share option should be available as either a text or a graphic that they can share
 
-In either case it should include the scores and a link to the webpage the game is located at
+In either case it should include the player's word-count score and a link to the webpage the game is located at
 
-If the player gave up and revealed the solution then the share card should say "This one beat me!" instead of the time and number of words used
+If the player gave up and revealed the solution then the share card should say "This one beat me!" instead of the word-count score
 
 ---
 
@@ -219,7 +201,7 @@ Thus:
 
 > **No valid move can make a solvable puzzle unsolvable.**
 
-The player may waste words or time, but cannot softlock the game through an accepted move.
+The player may waste words and worsen their score, but cannot softlock the game through an accepted move.
 
 ---
 
@@ -292,12 +274,12 @@ The implementation should preserve these rules:
 13. Invalid submissions do not alter game state.
 14. There is no undo for accepted words.
 15. The game ends immediately when all 25 tiles are covered.
-16. The game tracks words used and elapsed time.
+16. The player's score is the number of accepted words used.
 17. Daily mode changes puzzle at local midnight.
 18. Debug mode produces a new puzzle on refresh.
 19. No accepted move can make a solvable puzzle unsolvable.
-20. Paused time is excluded from elapsed time and the puzzle is hidden while paused.
-21. Switching tabs automatically pauses and resumes only a visibility-triggered pause.
+20. Perfect is the exact minimum number of words needed to cover the board.
+21. Par is Perfect plus 3.
 22. Revealing the answer after a win does not change the winning result.
 
 ---

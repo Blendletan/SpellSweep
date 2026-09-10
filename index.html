@@ -10,26 +10,18 @@
     <main>
       <h1>SpellSweep</h1>
       <p class="instructions">
-        Select adjacent tiles to make a word. Cover every tile to finish.
+        Select adjacent tiles to make words and cover every tile. Use fewer words
+        for a better score.
       </p>
 
       <section class="score" aria-label="Current score">
-        <span>Words: <strong id="words-used">0</strong></span>
+        <span>Score: <strong id="score-value">0</strong></span>
+        <span>Perfect: <strong id="perfect-score">—</strong></span>
+        <span>Par: <strong id="par-score">—</strong></span>
         <span>Covered: <strong id="covered-count">0</strong>/25</span>
-        <span>Time: <strong id="elapsed-time">0:00</strong></span>
       </section>
 
-      <button id="pause-game" class="pause-game" type="button" disabled>
-        Pause
-      </button>
-
-      <div class="board-shell">
-        <div id="board" class="board" aria-label="SpellSweep board"></div>
-        <div id="pause-cover" class="pause-cover" role="status" hidden>
-          <strong>Game paused</strong>
-          <span>The timer is stopped and the puzzle is hidden.</span>
-        </div>
-      </div>
+      <div id="board" class="board" aria-label="SpellSweep board"></div>
 
       <section class="word-panel" aria-label="Selected word">
         <div id="current-word" class="current-word">Select a tile</div>
@@ -73,7 +65,7 @@
 
       <dialog id="reveal-warning" class="reveal-warning">
         <h2>Reveal the answer?</h2>
-        <p>This will end your run and freeze your score and timer.</p>
+        <p>This will end your run and freeze your score.</p>
         <div class="actions">
           <button id="cancel-reveal" type="button">Keep playing</button>
           <button id="confirm-reveal" type="button">Reveal solution</button>

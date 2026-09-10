@@ -6,22 +6,19 @@ import {
   assertValidBoard,
   createDictionaryIndex,
   createGame,
-  elapsedMilliseconds,
   findMinimumWordSolution,
   generateCandidateBoard,
   giveUp,
-  isGamePaused,
   isGameOver,
   isSolvableBoard,
   isValidPath,
   isValidWord,
   localDateKey,
   minimumWordCover,
-  pauseGame,
+  PAR_MARGIN,
   parseDictionary,
   pathPattern,
   playableCoverage,
-  resumeGame,
   seededRandom,
   selectPuzzle,
   shareText,
@@ -97,8 +94,8 @@ test("the wildcard matches one letter and can change between words", () => {
 });
 
 test("an invalid submission has no effect", () => {
-  const game = createGame(boardWith({ 0: "c", 1: "a", 6: "t" }), 100);
-  const result = submitWord(game, [0, 1, 6], "cab", new Set(["cat"]), 200);
+  const game = createGame(boardWith({ 0: "c", 1: "a", 6: "t" }));
+  const result = submitWord(game, [0, 1, 6], "cab", new Set(["cat"]));
 
   assert.equal(result.accepted, false);
   assert.equal(result.state, game);
@@ -107,10 +104,10 @@ test("an invalid submission has no effect", () => {
 });
 
 test("accepted words increase the count and permanently add coverage", () => {
-  const game = createGame(boardWith({ 0: "c", 1: "a", 6: "t" }), 100);
+  const game = createGame(boardWith({ 0: "c", 1: "a", 6: "t" }));
   const dictionary = new Set(["cat"]);
-  const first = submitWord(game, [0, 1, 6], "cat", dictionary, 200);
-  const repeated = submitWord(first.state, [0, 1, 6], "cat", dictionary, 300);
+  const first = submitWord(game, [0, 1, 6], "cat", dictionary);
+  const repeated = submitWord(first.state, [0, 1, 6], "cat", dictionary);
 
   assert.equal(first.accepted, true);
   assert.equal(first.state.wordsUsed, 1);
@@ -137,74 +134,31 @@ test("covered tiles remain available in later words", () => {
 test("covering the final tiles completes the game immediately", () => {
   const board = boardWith();
   const nearlyComplete = {
-    ...createGame(board, 100),
+    ...createGame(board),
     covered: board.map((_, index) => index !== 0 && index !== 1),
   };
-  const result = submitWord(nearlyComplete, [0, 1], "aa", new Set(["aa"]), 475);
+  const result = submitWord(nearlyComplete, [0, 1], "aa", new Set(["aa"]));
 
   assert.equal(result.accepted, true);
-  assert.equal(result.state.completedAt, 475);
-  assert.equal(elapsedMilliseconds(result.state, 900), 375);
+  assert.equal(result.state.completed, true);
 
-  const afterCompletion = submitWord(result.state, [0, 1], "aa", new Set(["aa"]), 500);
+  const afterCompletion = submitWord(result.state, [0, 1], "aa", new Set(["aa"]));
   assert.equal(afterCompletion.accepted, false);
   assert.equal(afterCompletion.state, result.state);
 });
 
-test("elapsed time cannot be negative", () => {
-  assert.equal(elapsedMilliseconds(createGame(boardWith(), 500), 400), 0);
-});
-
-test("pausing freezes elapsed time and resuming excludes every paused interval", () => {
-  const started = createGame(boardWith(), 100);
-  const firstPause = pauseGame(started, 400);
-
-  assert.equal(isGamePaused(firstPause), true);
-  assert.equal(elapsedMilliseconds(firstPause, 900), 300);
-
-  const firstResume = resumeGame(firstPause, 1_000);
-  const secondPause = pauseGame(firstResume, 1_300);
-  const secondResume = resumeGame(secondPause, 1_500);
-
-  assert.equal(isGamePaused(secondResume), false);
-  assert.equal(secondResume.pausedMilliseconds, 800);
-  assert.equal(elapsedMilliseconds(secondResume, 1_900), 1_000);
-});
-
-test("repeated pause transitions are harmless and paused games reject words", () => {
-  const started = createGame(boardWith(), 100);
-  const paused = pauseGame(started, 200);
-
-  assert.equal(pauseGame(paused, 300), paused);
-  assert.equal(resumeGame(started, 300), started);
-
-  const submission = submitWord(paused, [0, 1], "aa", new Set(["aa"]), 400);
-  assert.equal(submission.accepted, false);
-  assert.equal(submission.state, paused);
-});
-
 test("giving up freezes the game without changing its score", () => {
-  const playing = createGame(boardWith(), 100);
-  const gaveUp = giveUp(playing, 475);
+  const playing = createGame(boardWith());
+  const gaveUp = giveUp(playing);
 
-  assert.equal(gaveUp.gaveUpAt, 475);
+  assert.equal(gaveUp.gaveUp, true);
   assert.equal(gaveUp.wordsUsed, 0);
-  assert.equal(elapsedMilliseconds(gaveUp, 900), 375);
   assert.equal(isGameOver(gaveUp), true);
 
-  const submission = submitWord(gaveUp, [0, 1], "aa", new Set(["aa"]), 500);
+  const submission = submitWord(gaveUp, [0, 1], "aa", new Set(["aa"]));
   assert.equal(submission.accepted, false);
   assert.equal(submission.state, gaveUp);
-  assert.equal(giveUp(gaveUp, 600), gaveUp);
-});
-
-test("giving up while paused preserves the elapsed play time", () => {
-  const paused = pauseGame(createGame(boardWith(), 100), 400);
-  const gaveUp = giveUp(paused, 900);
-
-  assert.equal(isGamePaused(gaveUp), false);
-  assert.equal(gaveUp.pausedMilliseconds, 500);
-  assert.equal(elapsedMilliseconds(gaveUp, 1_500), 300);
+  assert.equal(giveUp(gaveUp), gaveUp);
 });
 
 test("solvability is the union of overlapping valid word paths", () => {
@@ -331,6 +285,7 @@ test("minimum solution returns legal paths covering the full board", () => {
   const covered = new Set(solution.flatMap(({ path }) => path));
 
   assert.equal(solution.length, 2);
+  assert.equal(solution.length + PAR_MARGIN, 5);
   assert.equal(covered.size, 25);
   for (const { word, path } of solution) {
     assert.equal(isValidWord(board, path, word, dictionary.words), true);
@@ -340,15 +295,15 @@ test("minimum solution returns legal paths covering the full board", () => {
 test("share text reflects a win or a revealed answer", () => {
   const pageUrl = "https://example.com/spellsweep/";
   const won = {
-    ...createGame(boardWith(), 100),
+    ...createGame(boardWith()),
     wordsUsed: 4,
-    completedAt: 125_100,
+    completed: true,
   };
-  const lost = giveUp(createGame(boardWith(), 100), 125_100);
+  const lost = giveUp(createGame(boardWith()));
 
   assert.equal(
     shareText(won, pageUrl),
-    `SpellSweep\n4 words in 2:05\n${pageUrl}`,
+    `SpellSweep\n4 words\n${pageUrl}`,
   );
   assert.equal(
     shareText(lost, pageUrl),
@@ -360,15 +315,15 @@ test("share text reflects a win or a revealed answer", () => {
 test("finding an answer after completion does not change the winning share result", () => {
   const pageUrl = "https://example.com/spellsweep/";
   const won = {
-    ...createGame(boardWith(), 100),
+    ...createGame(boardWith()),
     covered: Array(25).fill(true),
     wordsUsed: 4,
-    completedAt: 125_100,
+    completed: true,
   };
   const beforeReveal = shareText(won, pageUrl);
 
   findMinimumWordSolution(won.board, createDictionaryIndex(new Set(["aa"])));
 
   assert.equal(shareText(won, pageUrl), beforeReveal);
-  assert.equal(giveUp(won, 200_000), won);
+  assert.equal(giveUp(won), won);
 });

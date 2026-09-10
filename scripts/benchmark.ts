@@ -58,10 +58,10 @@ for (let boardNumber = 1; boardNumber <= 10; boardNumber += 1) {
 
 const exampleBoard = boards[0];
 const exampleAnswer = findMinimumWordSolution(exampleBoard, dictionary)[0];
-const exampleGame = createGame(exampleBoard, 0);
+const exampleGame = createGame(exampleBoard);
 const submissionStarted = performance.now();
 for (let repetition = 0; repetition < 10_000; repetition += 1) {
-  submitWord(exampleGame, exampleAnswer.path, exampleAnswer.word, dictionary.words, 1);
+  submitWord(exampleGame, exampleAnswer.path, exampleAnswer.word, dictionary.words);
 }
 const submissionMilliseconds = performance.now() - submissionStarted;
 

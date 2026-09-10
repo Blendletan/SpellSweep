@@ -2,6 +2,7 @@ export const BOARD_SIZE = 5;
 export const TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
 export const WILDCARD_INDEX = 12;
 export const WILDCARD = "?";
+export const PAR_MARGIN = 3;
 
 export type Board = readonly string[];
 
@@ -9,11 +10,8 @@ export type GameState = Readonly<{
   board: Board;
   covered: readonly boolean[];
   wordsUsed: number;
-  startedAt: number;
-  pausedAt: number | null;
-  pausedMilliseconds: number;
-  completedAt: number | null;
-  gaveUpAt: number | null;
+  completed: boolean;
+  gaveUp: boolean;
 }>;
 
 export type Submission = Readonly<{
@@ -104,18 +102,15 @@ export function createDictionaryIndex(
   return { words, prefixes, maxWordLength };
 }
 
-export function createGame(board: Board, startedAt = Date.now()): GameState {
+export function createGame(board: Board): GameState {
   assertValidBoard(board);
 
   return {
     board: [...board],
     covered: Array(TILE_COUNT).fill(false),
     wordsUsed: 0,
-    startedAt,
-    pausedAt: null,
-    pausedMilliseconds: 0,
-    completedAt: null,
-    gaveUpAt: null,
+    completed: false,
+    gaveUp: false,
   };
 }
 
@@ -216,11 +211,9 @@ export function submitWord(
   path: readonly number[],
   submittedWord: string,
   dictionary: ReadonlySet<string>,
-  submittedAt = Date.now(),
 ): Submission {
   if (
     isGameOver(state) ||
-    isGamePaused(state) ||
     !isValidWord(state.board, path, submittedWord, dictionary)
   ) {
     return { accepted: false, state };
@@ -238,64 +231,21 @@ export function submitWord(
       ...state,
       covered,
       wordsUsed: state.wordsUsed + 1,
-      completedAt: completed ? submittedAt : null,
+      completed,
     },
   };
 }
 
-export function elapsedMilliseconds(state: GameState, now = Date.now()): number {
-  const end = state.completedAt ?? state.gaveUpAt ?? now;
-  const currentPause = state.pausedAt === null
-    ? 0
-    : Math.max(0, end - state.pausedAt);
-  return Math.max(
-    0,
-    end - state.startedAt - state.pausedMilliseconds - currentPause,
-  );
-}
-
 export function isGameOver(state: GameState): boolean {
-  return state.completedAt !== null || state.gaveUpAt !== null;
+  return state.completed || state.gaveUp;
 }
 
-export function isGamePaused(state: GameState): boolean {
-  return state.pausedAt !== null;
-}
-
-export function pauseGame(
-  state: GameState,
-  pausedAt = Date.now(),
-): GameState {
-  if (isGameOver(state) || isGamePaused(state)) {
-    return state;
-  }
-
-  return { ...state, pausedAt };
-}
-
-export function resumeGame(
-  state: GameState,
-  resumedAt = Date.now(),
-): GameState {
-  if (isGameOver(state) || state.pausedAt === null) {
-    return state;
-  }
-
-  return {
-    ...state,
-    pausedAt: null,
-    pausedMilliseconds:
-      state.pausedMilliseconds + Math.max(0, resumedAt - state.pausedAt),
-  };
-}
-
-export function giveUp(state: GameState, gaveUpAt = Date.now()): GameState {
+export function giveUp(state: GameState): GameState {
   if (isGameOver(state)) {
     return state;
   }
 
-  const playingState = resumeGame(state, gaveUpAt);
-  return { ...playingState, gaveUpAt };
+  return { ...state, gaveUp: true };
 }
 
 export function playableCoverage(
@@ -469,13 +419,12 @@ export function minimumWordCover(
 }
 
 export function shareText(state: GameState, pageUrl: string): string {
-  if (state.gaveUpAt !== null) {
+  if (state.gaveUp) {
     return `SpellSweep\nThis one beat me!\n${pageUrl}`;
   }
-  if (state.completedAt !== null) {
-    return `SpellSweep\n${state.wordsUsed} words in ${formatElapsed(
-      elapsedMilliseconds(state),
-    )}\n${pageUrl}`;
+  if (state.completed) {
+    const wordLabel = state.wordsUsed === 1 ? "word" : "words";
+    return `SpellSweep\n${state.wordsUsed} ${wordLabel}\n${pageUrl}`;
   }
   throw new Error("A game can only be shared after it ends.");
 }
@@ -603,13 +552,6 @@ function bitCount(value: number): number {
     count += 1;
   }
   return count;
-}
-
-function formatElapsed(milliseconds: number): string {
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${minutes}:${seconds}`;
 }
 
 function randomLetter(random: RandomSource): string {

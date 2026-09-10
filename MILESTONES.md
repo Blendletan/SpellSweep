@@ -204,9 +204,9 @@ Deployment result (September 9, 2026): commit `2f02ce1` deployed successfully to
 
 Completion criteria: the current prototype is playable from its GitHub Pages URL and is ready for cross-device testing. Complete.
 
-## Milestones 13–16: Iterative Playtesting Loop
+## Milestones 13–17: Iterative Playtesting Loop
 
-Milestones 13 through 16 are an iterative loop rather than a strict one-pass sequence. As the owner plays the game and begins showing it to other people, observations may move directly into interaction corrections, visual refinement, or tutorial changes before every checklist item in the preceding milestone is complete. Keep each change focused, test it, return to playtesting, and update these lists as evidence accumulates.
+Milestones 13 through 17 are an iterative loop rather than a strict one-pass sequence. As the owner plays the game and begins showing it to other people, observations may move directly into scoring corrections, interaction changes, visual refinement, or tutorial changes before every checklist item in the preceding milestone is complete. Keep each change focused, test it, return to playtesting, and update these lists as evidence accumulates.
 
 ## Milestone 13: Cross-Device Playtesting and Rule Review
 
@@ -225,7 +225,7 @@ Playtesting feedback recorded September 10, 2026 identified five concrete intera
 - [x] Confirm that the Reveal Answer mechanic and solution display are understandable in normal play.
 - [ ] Continue testing Reveal Answer cancellation, confirmation, and path inspection on each relevant device as the interface changes.
 - [ ] Test native sharing or its fallback on desktop and mobile.
-- [ ] Record typical completion times and word counts.
+- [ ] Record typical word counts and how they compare with Perfect and Par.
 - [x] Confirm that generated boards are solvable in practice, not merely in theory.
 - [ ] Record whether difficulty comes from the rules, generated letters, obscure dictionary words, or interaction friction.
 - [ ] Record accessibility and keyboard issues observed during real use.
@@ -235,8 +235,10 @@ Completion criteria: there is enough evidence from desktop, touchscreen, and pho
 
 ## Milestone 14: Interaction, Mobile, and Accessibility Corrections
 
+Superseded decision (September 10, 2026): the completed pause-related work below records what was implemented and tested, but pausing and elapsed-time scoring are no longer part of the game. Milestone 15 removes them before further polish.
+
 - [x] Update `GAME-RULES.md` before implementation to define pausing and post-completion answer revealing as explicit current behavior.
-- [x] On a rejected dictionary submission, show a clear error in the existing live status region, clear the selected path, clear any wildcard letter, and leave coverage, word count, and elapsed-time state otherwise unchanged.
+- [x] On a rejected dictionary submission, show a clear error in the existing live status region, clear the selected path, clear any wildcard letter, and leave coverage and word count otherwise unchanged.
 - [x] Verify that invalid-word feedback is visible long enough and prominent enough that Submit word cannot appear unresponsive.
 - [x] Add direct pause/resume state to the existing game data and elapsed-time calculation without introducing a separate timer service or configuration layer.
 - [x] While paused, freeze the displayed elapsed time, reject gameplay input, and cover the board with a simple pause surface that does not expose its letters.
@@ -248,22 +250,47 @@ Completion criteria: there is enough evidence from desktop, touchscreen, and pho
 - [x] Do not let Enter submit while paused, after the game ends, while the Reveal Answer confirmation is open, or when the current selection is incomplete.
 - [x] Increase the background and border contrast between covered and uncovered tiles while preserving the stronger selected-path state.
 - [x] Keep covered state understandable through accessible labels and a non-color-only visual cue where practical.
-- [x] Keep Reveal Answer enabled after a win; revealing a solved board should display the same minimum-word solution and inspectable paths without changing `completedAt`, `wordsUsed`, elapsed time, or setting the gave-up outcome.
+- [x] Keep Reveal Answer enabled after a win; revealing a solved board should display the same minimum-word solution and inspectable paths without changing the word count or setting the gave-up outcome.
 - [x] Preserve the existing confirmation and “This one beat me!” share result when Reveal Answer is used before completion.
 - [x] Bypass the give-up warning after completion because the run and score are already final, and prevent repeated solution computation once the answer is displayed.
-- [x] Verify that sharing after a solved-board reveal still reports the winning word count and time, never “This one beat me!”.
+- [x] Verify that sharing after a solved-board reveal preserves the winning outcome rather than saying “This one beat me!”; Milestone 15 revises the score format.
 - [x] Add focused logic tests for pause/resume timing, submission rejection while paused, repeated pause transitions, and unchanged completed results after answer reveal.
 - [x] Manually verify invalid feedback and clearing, Enter submission, pause concealment, and tile contrast in the local browser build.
-- [ ] Manually re-check automatic tab switching, both Reveal Answer paths, and both share-result variants during the next broader browser/device pass.
+- [ ] Manually re-check both Reveal Answer paths and both share-result variants during the next broader browser/device pass.
 - [ ] Adjust mobile layout and touch behavior where continued testing shows a need.
 - [x] Re-run the full rule suite and TypeScript compiler after these corrections.
 - [ ] Repeat targeted desktop, touchscreen, and phone checks as the iterative playtesting loop continues.
 
 Implementation result (September 10, 2026): the five reported changes are implemented in the existing direct game state and browser UI. The automated suite passes 29 tests, TypeScript compiles successfully, and a local browser check verified invalid-word clearing and feedback, Enter submission, pause concealment, and stronger covered-tile contrast.
 
-Completion criteria: invalid submissions are unmistakable and reset the attempt; manual and tab-triggered pauses conceal the board and exclude paused time; Enter submits safely; covered state is immediately distinguishable; and Reveal Answer works before or after completion while preserving the correct share result. The tested interaction works reliably across the target devices without unintended rule changes.
+Historical completion criteria (pause portions superseded by Milestone 15): invalid submissions are unmistakable and reset the attempt; Enter submits safely; covered state is immediately distinguishable; and Reveal Answer works before or after completion while preserving the correct share outcome. The tested interaction works reliably across the target devices without unintended rule changes.
 
-## Milestone 15: Final Visual Polish and Deployment Verification
+## Milestone 15: Word-Count Scoring, Perfect, and Par
+
+This is the next implementation priority.
+
+- [x] Remove the elapsed-time display and every timer update from the browser interface.
+- [x] Remove the Pause/Resume control, puzzle-cover overlay, tab-visibility behavior, and related styling.
+- [x] Remove pause state, accumulated paused duration, start/end timestamps used only for timing, and elapsed-time helpers from the game logic.
+- [x] Keep the player's score as the accepted-word count only; invalid submissions must not affect it.
+- [x] Use the existing exact minimum-word solution search to determine each puzzle's Perfect score.
+- [x] Calculate Par directly as Perfect plus 3 without adding a scoring framework or configuration system.
+- [x] Display Score, Perfect, and Par clearly throughout play and in the completed result.
+- [x] Retain the already-computed minimum solution for Reveal Answer so displaying Perfect does not require duplicate solution work.
+- [x] Keep Reveal Answer behavior unchanged: using it during play is a surrender, while using it after a win preserves the winning outcome.
+- [x] Update winning share text to contain the player's word-count score and webpage link with no elapsed-time result.
+- [x] Keep surrendered share text as “This one beat me!” with the webpage link.
+- [x] Remove obsolete pause/timer tests and add focused tests for exact Perfect, Par = Perfect + 3, word-count-only results, and both share outcomes.
+- [x] Update interface instructions, accessible labels, and result messages so none imply that speed affects scoring.
+- [x] Compile, run the complete test suite, and browser-test the revised score display, result states, Reveal Answer paths, and sharing behavior.
+
+Keep this change direct: the exact solver already defines Perfect, and Par is one addition. Do not introduce a generalized scoring system.
+
+Implementation result (September 10, 2026): timer and pause behavior were removed from the state, interface, styles, and tests. Each puzzle now computes and retains its exact minimum solution once, displays its length as Perfect, displays Perfect + 3 as Par, and uses accepted words as the sole player score. Winning share text contains only the word-count score and link; surrendered sharing remains “This one beat me!”. The 25-test suite passes, TypeScript compiles, and the revised score and answer displays were verified in the local browser build.
+
+Completion criteria: the game contains no timer or pause behavior; the only player score is accepted words used; every puzzle visibly shows its exact Perfect score and Par value; and completed and surrendered share results follow the revised scoring rules. Complete.
+
+## Milestone 16: Final Visual Polish and Deployment Verification
 
 - [ ] Improve typography, spacing, and board appearance after interaction stabilizes.
 - [ ] Refine feedback and restrained animations where useful.
@@ -275,14 +302,14 @@ Completion criteria: invalid submissions are unmistakable and reset the attempt;
 
 Completion criteria: the stabilized game is attractive, accessible, and verified on its final static GitHub Pages deployment.
 
-## Milestone 16: Player Tutorial
+## Milestone 17: Player Tutorial
 
 - [ ] Decide how players enter, dismiss, and replay the tutorial without obstructing normal play.
 - [ ] Explain the objective: cover all 25 tiles by submitting valid words.
 - [ ] Demonstrate adjacent horizontal, vertical, and diagonal tile selection.
 - [ ] Explain that a tile cannot be repeated within one word but may be reused in later words.
 - [ ] Demonstrate entering a letter for the center wildcard and explain that it may represent a different letter in each word.
-- [ ] Explain covered and uncovered tile states, scoring, the timer, and the consequence of Reveal Answer.
+- [ ] Explain covered and uncovered tile states, word-count scoring, Perfect, Par, and the consequence of Reveal Answer.
 - [ ] Keep the tutorial concise, keyboard accessible, touch friendly, and available to replay.
 - [ ] Verify the tutorial on desktop, touchscreen laptop, and phone without changing the tested game rules.
 
@@ -290,7 +317,7 @@ Prefer a small in-page walkthrough built with the existing HTML, CSS, and TypeSc
 
 Completion criteria: a first-time player can understand and begin playing SpellSweep without outside instructions, and an experienced player can skip or reopen the tutorial easily.
 
-## Milestone 17: GoatCounter Analytics
+## Milestone 18: GoatCounter Analytics
 
 - [ ] Create or confirm the GoatCounter site and obtain its public site code.
 - [ ] Add GoatCounter's smallest supported page-view integration to the static site.
