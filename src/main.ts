@@ -16,8 +16,18 @@ import {
   type GameState,
   type WordPath,
 } from "./game.js";
+import {
+  TUTORIAL_BOARD,
+  TUTORIAL_OPTIMAL_WORDS,
+  TUTORIAL_PAR,
+  TUTORIAL_PERFECT,
+  TUTORIAL_STEPS,
+  TUTORIAL_SUBOPTIMAL_WORDS,
+} from "./tutorial.js";
 
 const DAILY_MODE = false;
+const TUTORIAL_COOKIE_NAME = "spellsweepTutorialSeen";
+const TUTORIAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 
 const boardElement = requiredElement<HTMLDivElement>("board");
 const scoreElement = requiredElement<HTMLElement>("score-value");
@@ -39,6 +49,28 @@ const shareResultButton = requiredElement<HTMLButtonElement>("share-result");
 const revealWarningDialog = requiredElement<HTMLDialogElement>("reveal-warning");
 const cancelRevealButton = requiredElement<HTMLButtonElement>("cancel-reveal");
 const confirmRevealButton = requiredElement<HTMLButtonElement>("confirm-reveal");
+const showTutorialButton = requiredElement<HTMLButtonElement>("show-tutorial");
+const tutorialDialog = requiredElement<HTMLDialogElement>("tutorial-dialog");
+const closeTutorialButton = requiredElement<HTMLButtonElement>("close-tutorial");
+const tutorialTitleElement = requiredElement<HTMLHeadingElement>("tutorial-title");
+const tutorialDescriptionElement = requiredElement<HTMLParagraphElement>(
+  "tutorial-description",
+);
+const tutorialScoreElement = requiredElement<HTMLElement>("tutorial-score");
+const tutorialPerfectElement = requiredElement<HTMLElement>("tutorial-perfect");
+const tutorialParElement = requiredElement<HTMLElement>("tutorial-par");
+const tutorialCoveredElement = requiredElement<HTMLElement>("tutorial-covered");
+const tutorialBoardElement = requiredElement<HTMLDivElement>("tutorial-board");
+const tutorialCurrentWordElement = requiredElement<HTMLParagraphElement>(
+  "tutorial-current-word",
+);
+const tutorialWordListElement = requiredElement<HTMLDivElement>(
+  "tutorial-word-list",
+);
+const tutorialStepCountElement = requiredElement<HTMLElement>("tutorial-step-count");
+const tutorialProgressElement = requiredElement<HTMLDivElement>("tutorial-progress");
+const tutorialBackButton = requiredElement<HTMLButtonElement>("tutorial-back");
+const tutorialNextButton = requiredElement<HTMLButtonElement>("tutorial-next");
 
 let dictionary: DictionaryIndex;
 let game: GameState;
@@ -47,6 +79,7 @@ let minimumSolution: readonly WordPath[] = [];
 let answerRevealed = false;
 let selectedAnswerIndex = 0;
 let activeDateKey = localDateKey(new Date());
+let tutorialStepIndex = 0;
 
 submitButton.addEventListener("click", submitSelection);
 clearButton.addEventListener("click", clearSelection);
@@ -63,6 +96,22 @@ confirmRevealButton.addEventListener("click", () => {
   revealWarningDialog.close();
   void revealAnswer();
 });
+showTutorialButton.addEventListener("click", openTutorial);
+closeTutorialButton.addEventListener("click", () => tutorialDialog.close());
+tutorialBackButton.addEventListener("click", () => {
+  tutorialStepIndex = Math.max(0, tutorialStepIndex - 1);
+  renderTutorial();
+});
+tutorialNextButton.addEventListener("click", () => {
+  if (tutorialStepIndex === TUTORIAL_STEPS.length - 1) {
+    tutorialDialog.close();
+    return;
+  }
+
+  tutorialStepIndex += 1;
+  renderTutorial();
+});
+tutorialDialog.addEventListener("close", rememberTutorialSeen);
 shareResultButton.addEventListener("click", () => void shareResult());
 wildcardInput.addEventListener("input", () => {
   wildcardInput.value = wildcardInput.value.replace(/[^a-z]/gi, "").slice(0, 1);
@@ -85,6 +134,9 @@ async function loadGame(): Promise<void> {
     newPuzzleButton.disabled = false;
     revealAnswerButton.disabled = false;
     newPuzzleButton.textContent = DAILY_MODE ? "Restart today's puzzle" : "New puzzle";
+    if (!hasSeenTutorial()) {
+      openTutorial();
+    }
   } catch (error) {
     console.error(error);
     showMessage("The dictionary could not be loaded. Run the game from a web server.", "error");
@@ -143,7 +195,8 @@ function handleKeyDown(event: KeyboardEvent): void {
     event.key !== "Enter" ||
     event.repeat ||
     submitButton.disabled ||
-    revealWarningDialog.open
+    revealWarningDialog.open ||
+    tutorialDialog.open
   ) {
     return;
   }
@@ -159,6 +212,185 @@ function handleKeyDown(event: KeyboardEvent): void {
 
   event.preventDefault();
   submitSelection();
+}
+
+function openTutorial(): void {
+  tutorialStepIndex = 0;
+  renderTutorial();
+  if (!tutorialDialog.open) {
+    tutorialDialog.showModal();
+  }
+}
+
+function renderTutorial(): void {
+  const step = TUTORIAL_STEPS[tutorialStepIndex];
+  const displayedWords = step.showOptimalSolution
+    ? TUTORIAL_OPTIMAL_WORDS
+    : TUTORIAL_SUBOPTIMAL_WORDS.slice(0, step.acceptedWordCount);
+  const coveredTiles = new Set(displayedWords.flatMap(({ path }) => path));
+  const activePath = step.activeWord?.path ?? [];
+  const activeWord = step.activeWord?.word ?? "";
+  const displayedScore = step.showOptimalSolution
+    ? TUTORIAL_OPTIMAL_WORDS.length
+    : step.acceptedWordCount;
+
+  tutorialTitleElement.textContent = step.title;
+  tutorialDescriptionElement.textContent = step.description;
+  tutorialScoreElement.textContent = String(displayedScore);
+  tutorialPerfectElement.textContent = String(TUTORIAL_PERFECT);
+  tutorialParElement.textContent = String(TUTORIAL_PAR);
+  tutorialCoveredElement.textContent = String(coveredTiles.size);
+  tutorialStepCountElement.textContent = `Step ${tutorialStepIndex + 1} of ${
+    TUTORIAL_STEPS.length
+  }`;
+  tutorialBackButton.disabled = tutorialStepIndex === 0;
+  tutorialNextButton.textContent =
+    tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "Let’s play" : "Next";
+
+  tutorialBoardElement.classList.toggle("optimal", Boolean(step.showOptimalSolution));
+  tutorialBoardElement.setAttribute(
+    "aria-label",
+    activeWord
+      ? `Example board with ${coveredTiles.size} tiles covered. ${activeWord.toUpperCase()} is highlighted in selection order.`
+      : `Example board with ${coveredTiles.size} of 25 tiles covered.`,
+  );
+  tutorialBoardElement.replaceChildren(
+    createTutorialPath(activePath),
+    ...TUTORIAL_BOARD.map((tile, tileIndex) => {
+      const tileElement = document.createElement("div");
+      const selectedPosition = activePath.indexOf(tileIndex);
+      const wildcardPosition = step.activeWord?.path.indexOf(tileIndex) ?? -1;
+      const interpretedWildcard =
+        tile === WILDCARD && wildcardPosition !== -1
+          ? step.activeWord?.word[wildcardPosition]
+          : undefined;
+
+      tileElement.className = "tutorial-tile";
+      tileElement.classList.toggle("covered", coveredTiles.has(tileIndex));
+      tileElement.classList.toggle("selected", selectedPosition !== -1);
+      tileElement.classList.toggle("wildcard", tile === WILDCARD);
+      tileElement.textContent = (interpretedWildcard ?? tile).toUpperCase();
+      tileElement.setAttribute("aria-hidden", "true");
+
+      if (tile === WILDCARD && interpretedWildcard) {
+        const wildcardSymbol = document.createElement("span");
+        wildcardSymbol.className = "wildcard-symbol";
+        wildcardSymbol.textContent = "?";
+        tileElement.append(wildcardSymbol);
+      }
+
+      if (selectedPosition !== -1) {
+        const order = document.createElement("span");
+        order.className = "path-order";
+        order.textContent = String(selectedPosition + 1);
+        tileElement.append(order);
+      }
+
+      return tileElement;
+    }),
+  );
+
+  tutorialCurrentWordElement.textContent = activeWord
+    ? activeWord.toUpperCase()
+    : step.showOptimalSolution
+      ? `PERFECT SOLUTION: ${TUTORIAL_PERFECT} WORDS`
+      : step.acceptedWordCount === 0
+        ? "NO WORDS PLAYED YET"
+        : "PUZZLE SOLVED IN 6 WORDS";
+
+  renderTutorialWords(step.showOptimalSolution, displayedWords);
+  tutorialProgressElement.replaceChildren(
+    ...TUTORIAL_STEPS.map((_, index) => {
+      const dot = document.createElement("span");
+      dot.className = "tutorial-dot";
+      dot.classList.toggle("current", index === tutorialStepIndex);
+      return dot;
+    }),
+  );
+}
+
+function createTutorialPath(path: readonly number[]): SVGSVGElement {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.classList.add("tutorial-path");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("aria-hidden", "true");
+
+  for (let index = 1; index < path.length; index += 1) {
+    const previous = path[index - 1];
+    const current = path[index];
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", String((previous % 5) * 20 + 10));
+    line.setAttribute("y1", String(Math.floor(previous / 5) * 20 + 10));
+    line.setAttribute("x2", String((current % 5) * 20 + 10));
+    line.setAttribute("y2", String(Math.floor(current / 5) * 20 + 10));
+    svg.append(line);
+  }
+
+  return svg;
+}
+
+function renderTutorialWords(
+  showOptimalSolution: boolean | undefined,
+  displayedWords: readonly WordPath[],
+): void {
+  if (!showOptimalSolution) {
+    if (displayedWords.length === 0) {
+      tutorialWordListElement.setAttribute("aria-label", "No example words played yet");
+      const empty = document.createElement("span");
+      empty.className = "tutorial-word-chip";
+      empty.textContent = "Words played will appear here";
+      tutorialWordListElement.replaceChildren(empty);
+      return;
+    }
+
+    tutorialWordListElement.setAttribute(
+      "aria-label",
+      `Example words played: ${displayedWords.map(({ word }) => word).join(", ")}`,
+    );
+    tutorialWordListElement.replaceChildren(
+      ...displayedWords.map(({ word }) => createTutorialWordChip(word)),
+    );
+    return;
+  }
+
+  tutorialWordListElement.setAttribute(
+    "aria-label",
+    "Better solution: HOUSE, HOT, and PLANT are replaced by HOUSEPLANT. WATER and the two BREAD paths remain.",
+  );
+  const replacedWords = TUTORIAL_SUBOPTIMAL_WORDS.slice(0, 3).map(({ word }) =>
+    createTutorialWordChip(word, "replaced"),
+  );
+  const arrow = document.createElement("span");
+  arrow.className = "tutorial-word-chip";
+  arrow.textContent = "→";
+  const optimalWords = TUTORIAL_OPTIMAL_WORDS.map(({ word }) =>
+    createTutorialWordChip(word, "optimal"),
+  );
+  tutorialWordListElement.replaceChildren(...replacedWords, arrow, ...optimalWords);
+}
+
+function createTutorialWordChip(
+  word: string,
+  kind?: "replaced" | "optimal",
+): HTMLSpanElement {
+  const chip = document.createElement("span");
+  chip.className = "tutorial-word-chip";
+  if (kind) {
+    chip.classList.add(kind);
+  }
+  chip.textContent = word.toUpperCase();
+  return chip;
+}
+
+function hasSeenTutorial(): boolean {
+  return document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .some((cookie) => cookie.startsWith(`${TUTORIAL_COOKIE_NAME}=`));
+}
+
+function rememberTutorialSeen(): void {
+  document.cookie = `${TUTORIAL_COOKIE_NAME}=1; Max-Age=${TUTORIAL_COOKIE_MAX_AGE}; Path=/; SameSite=Lax`;
 }
 
 function submitSelection(): void {

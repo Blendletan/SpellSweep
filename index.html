@@ -8,7 +8,12 @@
   </head>
   <body>
     <main>
-      <h1>SpellSweep</h1>
+      <div class="title-row">
+        <h1>SpellSweep</h1>
+        <button id="show-tutorial" class="show-tutorial" type="button">
+          How to play
+        </button>
+      </div>
       <p class="instructions">
         Select adjacent tiles to make words and cover every tile. Use fewer words
         for a better score.
@@ -62,6 +67,66 @@
       <button id="new-puzzle" class="new-puzzle" type="button" disabled>
         New puzzle
       </button>
+
+      <dialog
+        id="tutorial-dialog"
+        class="tutorial-dialog"
+        aria-labelledby="tutorial-title"
+      >
+        <div class="tutorial-header">
+          <div>
+            <p class="tutorial-eyebrow">How to play SpellSweep</p>
+            <h2 id="tutorial-title"></h2>
+          </div>
+          <button
+            id="close-tutorial"
+            class="close-tutorial"
+            type="button"
+            aria-label="Close tutorial"
+          >
+            ×
+          </button>
+        </div>
+
+        <p
+          id="tutorial-description"
+          class="tutorial-description"
+          aria-live="polite"
+        ></p>
+
+        <section class="tutorial-example" aria-label="Tutorial example puzzle">
+          <div class="tutorial-score" aria-label="Example score">
+            <span>Score: <strong id="tutorial-score">0</strong></span>
+            <span>Perfect: <strong id="tutorial-perfect">4</strong></span>
+            <span>Par: <strong id="tutorial-par">7</strong></span>
+            <span>Covered: <strong id="tutorial-covered">0</strong>/25</span>
+          </div>
+
+          <div
+            id="tutorial-board"
+            class="tutorial-board"
+            role="img"
+            aria-label="Example SpellSweep board"
+          ></div>
+
+          <p id="tutorial-current-word" class="tutorial-current-word"></p>
+          <div
+            id="tutorial-word-list"
+            class="tutorial-word-list"
+            aria-label="Example words played"
+          ></div>
+        </section>
+
+        <div class="tutorial-progress-row">
+          <span id="tutorial-step-count">Step 1 of 10</span>
+          <div id="tutorial-progress" class="tutorial-progress" aria-hidden="true"></div>
+        </div>
+
+        <div class="tutorial-actions">
+          <button id="tutorial-back" type="button">Back</button>
+          <button id="tutorial-next" type="button">Next</button>
+        </div>
+      </dialog>
 
       <dialog id="reveal-warning" class="reveal-warning">
         <h2>Reveal the answer?</h2>

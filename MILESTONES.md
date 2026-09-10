@@ -310,32 +310,34 @@ This is the current implementation priority within the iterative playtesting loo
 - [x] Decide first-visit behavior: open the tutorial automatically when its first-party functional cookie is absent.
 - [x] Decide dismissal behavior: closing, skipping, or completing the tutorial records the cookie so later visits are not interrupted.
 - [x] Decide replay behavior: keep a permanent How to play control that reopens the tutorial at its first step without clearing or changing the active puzzle.
-- [ ] Curate an example board using familiar words and a clear suboptimal solution, ideally 5 words against a Perfect score of 4.
-- [ ] Validate every demonstrated word and path against `data/dictionary.txt`, and use the existing exact solver to verify the example's stated Perfect score against the full dictionary.
-- [ ] Introduce the objective: cover all 25 tiles by submitting valid words.
-- [ ] Tell players explicitly that SpellSweep uses the North American Scrabble dictionary.
-- [ ] Demonstrate tile-selection order and adjacent horizontal and vertical movement.
-- [ ] Demonstrate a diagonal move clearly enough that it cannot be mistaken for an orthogonal path.
-- [ ] Explain that a tile cannot be repeated within one word.
-- [ ] Demonstrate reusing an already-covered tile in a later word.
-- [ ] Demonstrate submitting the same word again, preferably along a different path that adds useful coverage, and explain that every accepted submission increases the score.
-- [ ] Demonstrate entering a letter for the center wildcard and explain that it may represent a different letter in each word.
-- [ ] Show the example player completing the board with a valid but suboptimal word count.
-- [ ] Compare the example result with Perfect and Par, reinforcing that the score is accepted words used and lower is better.
-- [ ] Reveal the missed shorter path and visually distinguish the unnecessary word or path that caused the gap from Perfect.
-- [ ] Explain covered and uncovered tile states and the consequence of using Reveal Answer before the puzzle is complete.
-- [ ] Finish with a brief rules recap and a clear Let’s play action.
-- [ ] Add Back, Next, close, current-step text, and compact progress indicators.
-- [ ] Keep tutorial rendering independent of the active `GameState` so opening, navigating, or dismissing it cannot change the current board, coverage, or score.
-- [ ] Implement the walkthrough directly with the existing HTML, CSS, and TypeScript; add no onboarding framework or runtime dependency.
-- [ ] Make the dialog keyboard accessible, announce step changes appropriately, preserve sensible focus, and support Escape dismissal.
-- [ ] Keep controls touch friendly and make the tutorial board and copy fit or scroll cleanly on phone-sized screens.
-- [ ] Test first-visit automatic display, all dismissal routes, cookie persistence across reloads, and manual replay from step one.
-- [ ] Verify the walkthrough and its unchanged live-game state on desktop, touchscreen laptop, and phone.
+- [x] Curate an example board using familiar words and a clear 6-word solution against a Perfect score of 4.
+- [x] Validate every demonstrated word and path against `data/dictionary.txt`, and use the existing exact solver to verify the example's stated Perfect score against the full dictionary.
+- [x] Introduce the objective: cover all 25 tiles by submitting valid words.
+- [x] Tell players explicitly that SpellSweep uses the North American Scrabble dictionary.
+- [x] Demonstrate tile-selection order and adjacent horizontal and vertical movement.
+- [x] Demonstrate a diagonal move clearly enough that it cannot be mistaken for an orthogonal path.
+- [x] Explain that a tile cannot be repeated within one word.
+- [x] Demonstrate reusing an already-covered tile in a later word.
+- [x] Demonstrate submitting the same word again along a different path that adds useful coverage, and explain that every accepted submission increases the score.
+- [x] Demonstrate entering a letter for the center wildcard and explain that it may represent a different letter in each word.
+- [x] Show the example player completing the board with a valid but suboptimal word count.
+- [x] Compare the example result with Perfect and Par, reinforcing that the score is accepted words used and lower is better.
+- [x] Reveal the missed shorter path and visually distinguish the unnecessary words that caused the gap from Perfect.
+- [x] Explain covered and uncovered tile states and the consequence of using Reveal Answer before the puzzle is complete.
+- [x] Finish with a brief rules recap and a clear Let’s play action.
+- [x] Add Back, Next, close, current-step text, and compact progress indicators.
+- [x] Keep tutorial rendering independent of the active `GameState` so opening, navigating, or dismissing it cannot change the current board, coverage, or score.
+- [x] Implement the walkthrough directly with the existing HTML, CSS, and TypeScript; add no onboarding framework or runtime dependency.
+- [x] Make the dialog keyboard accessible, announce step changes appropriately, preserve sensible focus, and support Escape dismissal.
+- [x] Keep controls touch friendly and make the tutorial board and copy fit or scroll cleanly on phone-sized screens.
+- [x] Test first-visit automatic display, dismissal through completion and Escape, cookie persistence across reloads, and manual replay from step one.
+- [x] Verify the walkthrough and its unchanged live-game state in the local browser's narrow touch-sized layout and responsive desktop styling; continue physical-device checks in the iterative playtesting loop.
 
 Prefer a small in-page walkthrough built with the existing HTML, CSS, and TypeScript. Do not add an onboarding framework or dependency.
 
-Completion criteria: a first-time player is automatically shown a concise walkthrough that explains the North American Scrabble dictionary, movement, reuse, wildcard, scoring, and optimization rules; dismissal persists across later visits; and any player can reopen the tutorial without affecting an active puzzle.
+Implementation result (September 10, 2026): the ten-step tutorial uses HOUSE, HOT, PLANT, WATER, BREAD, and BREAD to finish its fixed example in 6 words, then shows how HOUSEPLANT replaces the first three plays to reach the exact Perfect score of 4. The example was verified against the full authoritative dictionary. The tutorial opens automatically until dismissed, stores only a first-party seen flag, remains replayable from How to play, and leaves the live puzzle untouched. TypeScript compiles, all 25 tests pass, and local browser testing verified keyboard navigation, Escape dismissal, narrow-screen scrolling, cookie persistence, and replay from step one.
+
+Completion criteria: a first-time player is automatically shown a concise walkthrough that explains the North American Scrabble dictionary, movement, reuse, wildcard, scoring, and optimization rules; dismissal persists across later visits; and any player can reopen the tutorial without affecting an active puzzle. Complete.
 
 ## Milestone 18: GoatCounter Analytics
 
