@@ -19,7 +19,17 @@
         <span>Time: <strong id="elapsed-time">0:00</strong></span>
       </section>
 
-      <div id="board" class="board" aria-label="SpellSweep board"></div>
+      <button id="pause-game" class="pause-game" type="button" disabled>
+        Pause
+      </button>
+
+      <div class="board-shell">
+        <div id="board" class="board" aria-label="SpellSweep board"></div>
+        <div id="pause-cover" class="pause-cover" role="status" hidden>
+          <strong>Game paused</strong>
+          <span>The timer is stopped and the puzzle is hidden.</span>
+        </div>
+      </div>
 
       <section class="word-panel" aria-label="Selected word">
         <div id="current-word" class="current-word">Select a tile</div>

@@ -10,6 +10,8 @@ export type GameState = Readonly<{
   covered: readonly boolean[];
   wordsUsed: number;
   startedAt: number;
+  pausedAt: number | null;
+  pausedMilliseconds: number;
   completedAt: number | null;
   gaveUpAt: number | null;
 }>;
@@ -110,6 +112,8 @@ export function createGame(board: Board, startedAt = Date.now()): GameState {
     covered: Array(TILE_COUNT).fill(false),
     wordsUsed: 0,
     startedAt,
+    pausedAt: null,
+    pausedMilliseconds: 0,
     completedAt: null,
     gaveUpAt: null,
   };
@@ -216,6 +220,7 @@ export function submitWord(
 ): Submission {
   if (
     isGameOver(state) ||
+    isGamePaused(state) ||
     !isValidWord(state.board, path, submittedWord, dictionary)
   ) {
     return { accepted: false, state };
@@ -240,11 +245,48 @@ export function submitWord(
 
 export function elapsedMilliseconds(state: GameState, now = Date.now()): number {
   const end = state.completedAt ?? state.gaveUpAt ?? now;
-  return Math.max(0, end - state.startedAt);
+  const currentPause = state.pausedAt === null
+    ? 0
+    : Math.max(0, end - state.pausedAt);
+  return Math.max(
+    0,
+    end - state.startedAt - state.pausedMilliseconds - currentPause,
+  );
 }
 
 export function isGameOver(state: GameState): boolean {
   return state.completedAt !== null || state.gaveUpAt !== null;
+}
+
+export function isGamePaused(state: GameState): boolean {
+  return state.pausedAt !== null;
+}
+
+export function pauseGame(
+  state: GameState,
+  pausedAt = Date.now(),
+): GameState {
+  if (isGameOver(state) || isGamePaused(state)) {
+    return state;
+  }
+
+  return { ...state, pausedAt };
+}
+
+export function resumeGame(
+  state: GameState,
+  resumedAt = Date.now(),
+): GameState {
+  if (isGameOver(state) || state.pausedAt === null) {
+    return state;
+  }
+
+  return {
+    ...state,
+    pausedAt: null,
+    pausedMilliseconds:
+      state.pausedMilliseconds + Math.max(0, resumedAt - state.pausedAt),
+  };
 }
 
 export function giveUp(state: GameState, gaveUpAt = Date.now()): GameState {
@@ -252,7 +294,8 @@ export function giveUp(state: GameState, gaveUpAt = Date.now()): GameState {
     return state;
   }
 
-  return { ...state, gaveUpAt };
+  const playingState = resumeGame(state, gaveUpAt);
+  return { ...playingState, gaveUpAt };
 }
 
 export function playableCoverage(

@@ -204,6 +204,10 @@ Deployment result (September 9, 2026): commit `2f02ce1` deployed successfully to
 
 Completion criteria: the current prototype is playable from its GitHub Pages URL and is ready for cross-device testing. Complete.
 
+## Milestones 13–16: Iterative Playtesting Loop
+
+Milestones 13 through 16 are an iterative loop rather than a strict one-pass sequence. As the owner plays the game and begins showing it to other people, observations may move directly into interaction corrections, visual refinement, or tutorial changes before every checklist item in the preceding milestone is complete. Keep each change focused, test it, return to playtesting, and update these lists as evidence accumulates.
+
 ## Milestone 13: Cross-Device Playtesting and Rule Review
 
 Playtesting feedback recorded September 10, 2026 identified five concrete interaction problems to address in Milestone 14:
@@ -215,12 +219,14 @@ Playtesting feedback recorded September 10, 2026 identified five concrete intera
 - Reveal Answer must remain available after a solved puzzle without changing the completed result or the content shared for that win.
 
 - [ ] Play multiple debug-mode boards on a desktop computer.
-- [ ] Play on a touchscreen laptop and evaluate touch selection and wildcard entry.
-- [ ] Play on a phone and evaluate layout, text size, controls, scrolling, and touch behavior.
-- [ ] Test Reveal Answer cancellation, confirmation, minimum-solution display, and path inspection on each relevant device.
+- [x] Confirm that the game is practically playable on desktop, phones, and touchscreens.
+- [ ] Continue evaluating touchscreen wildcard entry and other detailed touch interactions.
+- [ ] Continue evaluating phone layout, text size, controls, and scrolling as the interface changes.
+- [x] Confirm that the Reveal Answer mechanic and solution display are understandable in normal play.
+- [ ] Continue testing Reveal Answer cancellation, confirmation, and path inspection on each relevant device as the interface changes.
 - [ ] Test native sharing or its fallback on desktop and mobile.
 - [ ] Record typical completion times and word counts.
-- [ ] Evaluate whether boards are solvable in practice, not merely in theory.
+- [x] Confirm that generated boards are solvable in practice, not merely in theory.
 - [ ] Record whether difficulty comes from the rules, generated letters, obscure dictionary words, or interaction friction.
 - [ ] Record accessibility and keyboard issues observed during real use.
 - [ ] Decide which findings require rule changes and which require interface changes.
@@ -229,27 +235,31 @@ Completion criteria: there is enough evidence from desktop, touchscreen, and pho
 
 ## Milestone 14: Interaction, Mobile, and Accessibility Corrections
 
-- [ ] Update `GAME-RULES.md` before implementation to define pausing and post-completion answer revealing as explicit current behavior.
-- [ ] On a rejected dictionary submission, show a clear error in the existing live status region, clear the selected path, clear any wildcard letter, and leave coverage, word count, and elapsed-time state otherwise unchanged.
-- [ ] Verify that invalid-word feedback is visible long enough and prominent enough that Submit word cannot appear unresponsive.
-- [ ] Add direct pause/resume state to the existing game data and elapsed-time calculation without introducing a separate timer service or configuration layer.
-- [ ] While paused, freeze the displayed elapsed time, reject gameplay input, and cover the board with a simple pause surface that does not expose its letters.
-- [ ] Add one obvious Pause/Resume control that is unavailable after the run ends.
-- [ ] Listen for browser visibility changes and pause an active run when its tab becomes hidden.
-- [ ] Working decision pending owner confirmation: automatically resume when the tab becomes visible only if hiding the tab caused the pause; never automatically resume a pause the player initiated manually.
-- [ ] Ensure repeated visibility events, manual pause followed by tab switching, and time spent paused cannot double-count or lose elapsed time.
-- [ ] Submit the current selection when Enter is pressed and Submit word is enabled.
-- [ ] Do not let Enter submit while paused, after the game ends, while the Reveal Answer confirmation is open, or when the current selection is incomplete.
-- [ ] Increase the background and border contrast between covered and uncovered tiles while preserving the stronger selected-path state.
-- [ ] Keep covered state understandable through accessible labels and a non-color-only visual cue where practical.
-- [ ] Keep Reveal Answer enabled after a win; revealing a solved board should display the same minimum-word solution and inspectable paths without changing `completedAt`, `wordsUsed`, elapsed time, or setting the gave-up outcome.
-- [ ] Preserve the existing confirmation and “This one beat me!” share result when Reveal Answer is used before completion.
-- [ ] Bypass the give-up warning after completion because the run and score are already final, and prevent repeated solution computation once the answer is displayed.
-- [ ] Verify that sharing after a solved-board reveal still reports the winning word count and time, never “This one beat me!”.
-- [ ] Add focused logic tests for pause/resume timing, submission rejection while paused, repeated pause transitions, and unchanged completed results after answer reveal.
-- [ ] Manually verify invalid feedback and clearing, Enter submission, pause concealment, tab switching, tile contrast, both Reveal Answer paths, and both share-result variants in the browser.
+- [x] Update `GAME-RULES.md` before implementation to define pausing and post-completion answer revealing as explicit current behavior.
+- [x] On a rejected dictionary submission, show a clear error in the existing live status region, clear the selected path, clear any wildcard letter, and leave coverage, word count, and elapsed-time state otherwise unchanged.
+- [x] Verify that invalid-word feedback is visible long enough and prominent enough that Submit word cannot appear unresponsive.
+- [x] Add direct pause/resume state to the existing game data and elapsed-time calculation without introducing a separate timer service or configuration layer.
+- [x] While paused, freeze the displayed elapsed time, reject gameplay input, and cover the board with a simple pause surface that does not expose its letters.
+- [x] Add one obvious Pause/Resume control that is unavailable after the run ends.
+- [x] Listen for browser visibility changes and pause an active run when its tab becomes hidden.
+- [x] Automatically resume when the tab becomes visible only if hiding the tab caused the pause; never automatically resume a pause the player initiated manually.
+- [x] Ensure repeated visibility events, manual pause followed by tab switching, and time spent paused cannot double-count or lose elapsed time.
+- [x] Submit the current selection when Enter is pressed and Submit word is enabled.
+- [x] Do not let Enter submit while paused, after the game ends, while the Reveal Answer confirmation is open, or when the current selection is incomplete.
+- [x] Increase the background and border contrast between covered and uncovered tiles while preserving the stronger selected-path state.
+- [x] Keep covered state understandable through accessible labels and a non-color-only visual cue where practical.
+- [x] Keep Reveal Answer enabled after a win; revealing a solved board should display the same minimum-word solution and inspectable paths without changing `completedAt`, `wordsUsed`, elapsed time, or setting the gave-up outcome.
+- [x] Preserve the existing confirmation and “This one beat me!” share result when Reveal Answer is used before completion.
+- [x] Bypass the give-up warning after completion because the run and score are already final, and prevent repeated solution computation once the answer is displayed.
+- [x] Verify that sharing after a solved-board reveal still reports the winning word count and time, never “This one beat me!”.
+- [x] Add focused logic tests for pause/resume timing, submission rejection while paused, repeated pause transitions, and unchanged completed results after answer reveal.
+- [x] Manually verify invalid feedback and clearing, Enter submission, pause concealment, and tile contrast in the local browser build.
+- [ ] Manually re-check automatic tab switching, both Reveal Answer paths, and both share-result variants during the next broader browser/device pass.
 - [ ] Adjust mobile layout and touch behavior where continued testing shows a need.
-- [ ] Re-run the full rule suite and targeted desktop, touchscreen, and phone checks after each meaningful correction.
+- [x] Re-run the full rule suite and TypeScript compiler after these corrections.
+- [ ] Repeat targeted desktop, touchscreen, and phone checks as the iterative playtesting loop continues.
+
+Implementation result (September 10, 2026): the five reported changes are implemented in the existing direct game state and browser UI. The automated suite passes 29 tests, TypeScript compiles successfully, and a local browser check verified invalid-word clearing and feedback, Enter submission, pause concealment, and stronger covered-tile contrast.
 
 Completion criteria: invalid submissions are unmistakable and reset the attempt; manual and tab-triggered pauses conceal the board and exclude paused time; Enter submits safely; covered state is immediately distinguishable; and Reveal Answer works before or after completion while preserving the correct share result. The tested interaction works reliably across the target devices without unintended rule changes.
 

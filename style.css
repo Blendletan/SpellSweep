@@ -40,9 +40,38 @@ h1 {
   aspect-ratio: 1;
 }
 
+.board-shell {
+  position: relative;
+}
+
+.pause-game {
+  margin-bottom: 0.75rem;
+}
+
+.pause-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid #374151;
+  border-radius: 0.4rem;
+  color: #111827;
+  background: #e5e7eb;
+  font-size: 1.1rem;
+}
+
+.pause-cover[hidden] {
+  display: none;
+}
+
 .tile {
+  position: relative;
   min-width: 0;
-  border: 2px solid #6b7280;
+  border: 2px solid #4b5563;
   border-radius: 0.4rem;
   color: #202124;
   background: white;
@@ -53,12 +82,23 @@ h1 {
 }
 
 .tile.covered {
-  border-color: #2f7d4a;
-  background: #d9f2df;
+  border-color: #14532d;
+  color: white;
+  background: #2f7d4a;
+}
+
+.tile.covered::after {
+  content: "✓";
+  position: absolute;
+  top: 0.15rem;
+  right: 0.25rem;
+  font-size: 0.65rem;
+  line-height: 1;
 }
 
 .tile.selected {
   border-color: #205cc5;
+  color: #202124;
   background: #dbeafe;
   outline: 2px solid #205cc5;
 }
@@ -128,10 +168,16 @@ button:disabled {
 
 .message {
   min-height: 1.5rem;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
 }
 
 .message.error {
   color: #a11b1b;
+  border-color: #dc2626;
+  background: #fee2e2;
+  font-weight: 700;
 }
 
 .message.success {

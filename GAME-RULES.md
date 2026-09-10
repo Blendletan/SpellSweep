@@ -143,6 +143,25 @@ It:
 
 The only penalty is the time the player spent attempting it.
 
+The interface must clearly tell the player that the word is not in the dictionary, then clear the selected path and any wildcard entry so a new word can be started immediately.
+
+---
+
+# Pausing
+
+The player may pause an active puzzle manually.
+
+While paused:
+
+- the puzzle is covered so its letters cannot be studied;
+- the elapsed timer does not advance;
+- word selection and submission are unavailable;
+- the player may resume using the same pause control.
+
+Switching away from the browser tab pauses an active puzzle automatically. Returning to that tab resumes it automatically only when switching away caused the pause. A game that the player paused manually must remain paused after switching tabs until the player explicitly resumes it.
+
+Pausing is unavailable after the puzzle has been solved or the player has given up.
+
 ---
 
 # Winning
@@ -169,6 +188,8 @@ The player should have the option to give up by pressing a reveal answer button
 If they do so the timer and number of words used should both freeze
 
 The game should then tell the player a valid solution
+
+After a puzzle has already been solved, the Reveal Answer button remains available and may show the same solution without changing the completed score, elapsed time, or outcome. Revealing after a win does not turn the result into a surrender.
 
 ---
 
@@ -275,6 +296,9 @@ The implementation should preserve these rules:
 17. Daily mode changes puzzle at local midnight.
 18. Debug mode produces a new puzzle on refresh.
 19. No accepted move can make a solvable puzzle unsolvable.
+20. Paused time is excluded from elapsed time and the puzzle is hidden while paused.
+21. Switching tabs automatically pauses and resumes only a visibility-triggered pause.
+22. Revealing the answer after a win does not change the winning result.
 
 ---
 

@@ -6,8 +6,11 @@ import {
   findMinimumWordSolution,
   giveUp,
   isGameOver,
+  isGamePaused,
   localDateKey,
+  pauseGame,
   parseDictionary,
+  resumeGame,
   selectPuzzle,
   shareText,
   submitWord,
@@ -23,6 +26,8 @@ const boardElement = requiredElement<HTMLDivElement>("board");
 const wordsUsedElement = requiredElement<HTMLElement>("words-used");
 const coveredCountElement = requiredElement<HTMLElement>("covered-count");
 const elapsedTimeElement = requiredElement<HTMLElement>("elapsed-time");
+const pauseButton = requiredElement<HTMLButtonElement>("pause-game");
+const pauseCover = requiredElement<HTMLDivElement>("pause-cover");
 const currentWordElement = requiredElement<HTMLDivElement>("current-word");
 const wildcardControl = requiredElement<HTMLLabelElement>("wildcard-control");
 const wildcardInput = requiredElement<HTMLInputElement>("wildcard-letter");
@@ -45,11 +50,13 @@ let selectedPath: number[] = [];
 let revealedSolution: readonly WordPath[] = [];
 let selectedAnswerIndex = 0;
 let activeDateKey = localDateKey(new Date());
+let pauseCause: "manual" | "visibility" | null = null;
 
 submitButton.addEventListener("click", submitSelection);
 clearButton.addEventListener("click", clearSelection);
+pauseButton.addEventListener("click", toggleManualPause);
 newPuzzleButton.addEventListener("click", () => startPuzzle());
-revealAnswerButton.addEventListener("click", () => revealWarningDialog.showModal());
+revealAnswerButton.addEventListener("click", requestRevealAnswer);
 cancelRevealButton.addEventListener("click", () => {
   revealWarningDialog.close();
   showMessage("Your run is still active.", "neutral");
@@ -66,6 +73,8 @@ wildcardInput.addEventListener("input", () => {
   wildcardInput.value = wildcardInput.value.replace(/[^a-z]/gi, "").slice(0, 1);
   renderSelection();
 });
+document.addEventListener("keydown", handleKeyDown);
+document.addEventListener("visibilitychange", handleVisibilityChange);
 
 void loadGame();
 setInterval(updateClock, 250);
@@ -81,6 +90,7 @@ async function loadGame(): Promise<void> {
     startPuzzle();
     newPuzzleButton.disabled = false;
     revealAnswerButton.disabled = false;
+    pauseButton.disabled = false;
     newPuzzleButton.textContent = DAILY_MODE ? "Restart today's puzzle" : "New puzzle";
   } catch (error) {
     console.error(error);
@@ -93,7 +103,12 @@ function startPuzzle(): void {
   selectedPath = [];
   revealedSolution = [];
   selectedAnswerIndex = 0;
+  pauseCause = null;
   wildcardInput.value = "";
+  if (document.hidden) {
+    game = pauseGame(game);
+    pauseCause = "visibility";
+  }
   activeDateKey = localDateKey(new Date());
   render();
   showMessage(
@@ -134,12 +149,77 @@ function clearSelection(): void {
   render();
 }
 
+function toggleManualPause(): void {
+  if (isGameOver(game)) {
+    return;
+  }
+
+  if (isGamePaused(game)) {
+    game = resumeGame(game);
+    pauseCause = null;
+    showMessage("Game resumed.", "neutral");
+  } else {
+    game = pauseGame(game);
+    pauseCause = "manual";
+    showMessage("Game paused.", "neutral");
+  }
+  render();
+}
+
+function handleVisibilityChange(): void {
+  if (!game || isGameOver(game)) {
+    return;
+  }
+
+  if (document.hidden) {
+    if (!isGamePaused(game)) {
+      game = pauseGame(game);
+      pauseCause = "visibility";
+      render();
+    }
+  } else if (pauseCause === "visibility" && isGamePaused(game)) {
+    game = resumeGame(game);
+    pauseCause = null;
+    render();
+    showMessage("Game resumed.", "neutral");
+  }
+}
+
+function handleKeyDown(event: KeyboardEvent): void {
+  if (
+    event.key !== "Enter" ||
+    event.repeat ||
+    submitButton.disabled ||
+    revealWarningDialog.open
+  ) {
+    return;
+  }
+
+  const target = event.target;
+  if (
+    target instanceof HTMLButtonElement &&
+    target !== submitButton &&
+    !target.classList.contains("tile")
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  submitSelection();
+}
+
 function submitSelection(): void {
   const word = selectedWord();
   const result = submitWord(game, selectedPath, word, dictionary.words);
 
   if (!result.accepted) {
-    showMessage(`${word || "That selection"} is not a valid word.`, "error");
+    selectedPath = [];
+    wildcardInput.value = "";
+    render();
+    showMessage(
+      word ? `${word.toUpperCase()} is not in the dictionary.` : "That selection is not a valid word.",
+      "error",
+    );
     return;
   }
 
@@ -159,12 +239,35 @@ function submitSelection(): void {
   render();
 }
 
-async function revealAnswer(): Promise<void> {
-  if (isGameOver(game)) {
+function requestRevealAnswer(): void {
+  if (
+    game.gaveUpAt !== null ||
+    isGamePaused(game) ||
+    revealedSolution.length > 0
+  ) {
     return;
   }
 
-  game = giveUp(game);
+  if (game.completedAt !== null) {
+    void revealAnswer();
+  } else {
+    revealWarningDialog.showModal();
+  }
+}
+
+async function revealAnswer(): Promise<void> {
+  if (
+    game.gaveUpAt !== null ||
+    isGamePaused(game) ||
+    revealedSolution.length > 0
+  ) {
+    return;
+  }
+
+  const completedBeforeReveal = game.completedAt !== null;
+  if (!completedBeforeReveal) {
+    game = giveUp(game);
+  }
   selectedPath = [];
   wildcardInput.value = "";
   render();
@@ -174,7 +277,12 @@ async function revealAnswer(): Promise<void> {
   revealedSolution = findMinimumWordSolution(game.board, dictionary);
   selectedAnswerIndex = 0;
   render();
-  showMessage("Answer revealed. Your score and timer are frozen.", "neutral");
+  showMessage(
+    completedBeforeReveal
+      ? "Answer revealed. Your winning result is unchanged."
+      : "Answer revealed. Your score and timer are frozen.",
+    "neutral",
+  );
 }
 
 async function shareResult(): Promise<void> {
@@ -232,7 +340,7 @@ function render(): void {
       button.classList.toggle("wildcard", tile === WILDCARD);
       button.classList.toggle("covered", game.covered[tileIndex]);
       button.classList.toggle("selected", selectedPosition !== -1);
-      button.disabled = isGameOver(game);
+      button.disabled = isGameOver(game) || isGamePaused(game);
       button.setAttribute("aria-pressed", String(selectedPosition !== -1));
       button.setAttribute(
         "aria-label",
@@ -253,7 +361,13 @@ function render(): void {
 
   wordsUsedElement.textContent = String(game.wordsUsed);
   coveredCountElement.textContent = String(game.covered.filter(Boolean).length);
-  revealAnswerButton.disabled = isGameOver(game);
+  const paused = isGamePaused(game);
+  pauseButton.disabled = isGameOver(game);
+  pauseButton.textContent = paused ? "Resume" : "Pause";
+  pauseCover.hidden = !paused;
+  boardElement.setAttribute("aria-hidden", String(paused));
+  revealAnswerButton.disabled =
+    paused || game.gaveUpAt !== null || revealedSolution.length > 0;
   shareResultButton.hidden = !isGameOver(game);
   renderAnswer();
   renderSelection();
@@ -273,6 +387,14 @@ function renderSelection(): void {
   if (game.completedAt !== null) {
     wildcardControl.hidden = true;
     currentWordElement.textContent = "Puzzle complete";
+    clearButton.disabled = true;
+    submitButton.disabled = true;
+    return;
+  }
+
+  if (isGamePaused(game)) {
+    wildcardControl.hidden = true;
+    currentWordElement.textContent = "Game paused";
     clearButton.disabled = true;
     submitButton.disabled = true;
     return;

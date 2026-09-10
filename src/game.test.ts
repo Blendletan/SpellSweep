@@ -10,15 +10,18 @@ import {
   findMinimumWordSolution,
   generateCandidateBoard,
   giveUp,
+  isGamePaused,
   isGameOver,
   isSolvableBoard,
   isValidPath,
   isValidWord,
   localDateKey,
   minimumWordCover,
+  pauseGame,
   parseDictionary,
   pathPattern,
   playableCoverage,
+  resumeGame,
   seededRandom,
   selectPuzzle,
   shareText,
@@ -152,6 +155,34 @@ test("elapsed time cannot be negative", () => {
   assert.equal(elapsedMilliseconds(createGame(boardWith(), 500), 400), 0);
 });
 
+test("pausing freezes elapsed time and resuming excludes every paused interval", () => {
+  const started = createGame(boardWith(), 100);
+  const firstPause = pauseGame(started, 400);
+
+  assert.equal(isGamePaused(firstPause), true);
+  assert.equal(elapsedMilliseconds(firstPause, 900), 300);
+
+  const firstResume = resumeGame(firstPause, 1_000);
+  const secondPause = pauseGame(firstResume, 1_300);
+  const secondResume = resumeGame(secondPause, 1_500);
+
+  assert.equal(isGamePaused(secondResume), false);
+  assert.equal(secondResume.pausedMilliseconds, 800);
+  assert.equal(elapsedMilliseconds(secondResume, 1_900), 1_000);
+});
+
+test("repeated pause transitions are harmless and paused games reject words", () => {
+  const started = createGame(boardWith(), 100);
+  const paused = pauseGame(started, 200);
+
+  assert.equal(pauseGame(paused, 300), paused);
+  assert.equal(resumeGame(started, 300), started);
+
+  const submission = submitWord(paused, [0, 1], "aa", new Set(["aa"]), 400);
+  assert.equal(submission.accepted, false);
+  assert.equal(submission.state, paused);
+});
+
 test("giving up freezes the game without changing its score", () => {
   const playing = createGame(boardWith(), 100);
   const gaveUp = giveUp(playing, 475);
@@ -165,6 +196,15 @@ test("giving up freezes the game without changing its score", () => {
   assert.equal(submission.accepted, false);
   assert.equal(submission.state, gaveUp);
   assert.equal(giveUp(gaveUp, 600), gaveUp);
+});
+
+test("giving up while paused preserves the elapsed play time", () => {
+  const paused = pauseGame(createGame(boardWith(), 100), 400);
+  const gaveUp = giveUp(paused, 900);
+
+  assert.equal(isGamePaused(gaveUp), false);
+  assert.equal(gaveUp.pausedMilliseconds, 500);
+  assert.equal(elapsedMilliseconds(gaveUp, 1_500), 300);
 });
 
 test("solvability is the union of overlapping valid word paths", () => {
@@ -315,4 +355,20 @@ test("share text reflects a win or a revealed answer", () => {
     `SpellSweep\nThis one beat me!\n${pageUrl}`,
   );
   assert.throws(() => shareText(createGame(boardWith()), pageUrl));
+});
+
+test("finding an answer after completion does not change the winning share result", () => {
+  const pageUrl = "https://example.com/spellsweep/";
+  const won = {
+    ...createGame(boardWith(), 100),
+    covered: Array(25).fill(true),
+    wordsUsed: 4,
+    completedAt: 125_100,
+  };
+  const beforeReveal = shareText(won, pageUrl);
+
+  findMinimumWordSolution(won.board, createDictionaryIndex(new Set(["aa"])));
+
+  assert.equal(shareText(won, pageUrl), beforeReveal);
+  assert.equal(giveUp(won, 200_000), won);
 });
