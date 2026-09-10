@@ -171,15 +171,19 @@ Completion criteria: a finished or surrendered game can produce the correct shar
 - [ ] Identify reliance on obscure dictionary words.
 - [ ] Revise rules or interaction directly when playtesting supports a change.
 
+Initial playtest checkpoint (September 9, 2026): the project owner reports that the game is difficult but fun and approved proceeding. Keep this milestone open for broader difficulty, score, interaction, and dictionary-word observations during continued playtesting.
+
 Completion criteria: there is enough playtest evidence to judge whether the core game is enjoyable and where its actual friction lies.
 
 ## Milestone 11: Performance Review
 
-- [ ] Measure dictionary loading time.
-- [ ] Measure valid-path and solvability search time.
-- [ ] Measure solvable-board generation time.
-- [ ] Check UI responsiveness during selection and submission.
-- [ ] Optimize only behavior demonstrated to be too slow.
+- [x] Measure dictionary loading time.
+- [x] Measure valid-path and solvability search time.
+- [x] Measure solvable-board generation time.
+- [x] Check UI responsiveness during selection and submission.
+- [x] Optimize only behavior demonstrated to be too slow.
+
+Measured September 9, 2026 across 10 deterministic boards: dictionary read 4.83 ms; dictionary parse 79.53 ms; prefix index 267.11 ms; solvable-board generation averaged 29.16 ms and reached 69.47 ms maximum; solvability checks averaged 24.11 ms and reached 64.82 ms maximum; exact minimum-answer search averaged 90.48 ms and reached 136.53 ms maximum; core valid submissions averaged below 0.01 ms. Browser playtesting showed immediate selection and submission feedback. No optimization is justified by these measurements.
 
 Completion criteria: the game performs acceptably on its intended browsers, or a measured bottleneck has a focused solution.
 
