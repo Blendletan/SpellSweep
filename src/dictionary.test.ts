@@ -84,5 +84,8 @@ test("the authoritative dictionary loads and can produce a daily puzzle", async 
     TUTORIAL_SUBOPTIMAL_WORDS[5]?.path,
   );
   assert.deepEqual(TUTORIAL_SUBOPTIMAL_WORDS[1]?.path, [0, 1, 5]);
+  assert.equal(TUTORIAL_STEPS.length, 11);
+  assert.equal(TUTORIAL_STEPS[0]?.isWelcome, true);
+  assert.equal(TUTORIAL_STEPS[1]?.title, "Cover the board");
   assert.equal(TUTORIAL_STEPS.at(-2)?.showOptimalSolution, true);
 });

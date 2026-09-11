@@ -42,11 +42,19 @@ export type TutorialStep = Readonly<{
   title: string;
   description: string;
   acceptedWordCount: number;
+  isWelcome?: boolean;
   activeWord?: WordPath;
   showOptimalSolution?: boolean;
 }>;
 
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
+  {
+    title: "Welcome to SpellSweep!",
+    description:
+      "This quick tutorial will show you how to play and improve your score. Select Next to begin, or close this window with the × button or Escape key to start playing right away.",
+    acceptedWordCount: 0,
+    isWelcome: true,
+  },
   {
     title: "Cover the board",
     description:

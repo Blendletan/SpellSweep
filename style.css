@@ -428,6 +428,10 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+.tutorial-progress-row[hidden] {
+  display: none;
+}
+
 .tutorial-progress {
   display: flex;
   gap: 0.3rem;

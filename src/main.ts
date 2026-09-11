@@ -56,6 +56,7 @@ const tutorialTitleElement = requiredElement<HTMLHeadingElement>("tutorial-title
 const tutorialDescriptionElement = requiredElement<HTMLParagraphElement>(
   "tutorial-description",
 );
+const tutorialExampleElement = requiredElement<HTMLElement>("tutorial-example");
 const tutorialScoreElement = requiredElement<HTMLElement>("tutorial-score");
 const tutorialPerfectElement = requiredElement<HTMLElement>("tutorial-perfect");
 const tutorialParElement = requiredElement<HTMLElement>("tutorial-par");
@@ -66,6 +67,9 @@ const tutorialCurrentWordElement = requiredElement<HTMLParagraphElement>(
 );
 const tutorialWordListElement = requiredElement<HTMLDivElement>(
   "tutorial-word-list",
+);
+const tutorialProgressRowElement = requiredElement<HTMLDivElement>(
+  "tutorial-progress-row",
 );
 const tutorialStepCountElement = requiredElement<HTMLElement>("tutorial-step-count");
 const tutorialProgressElement = requiredElement<HTMLDivElement>("tutorial-progress");
@@ -224,6 +228,7 @@ function openTutorial(): void {
 
 function renderTutorial(): void {
   const step = TUTORIAL_STEPS[tutorialStepIndex];
+  const isWelcome = Boolean(step.isWelcome);
   const displayedWords = step.showOptimalSolution
     ? TUTORIAL_OPTIMAL_WORDS
     : TUTORIAL_SUBOPTIMAL_WORDS.slice(0, step.acceptedWordCount);
@@ -236,14 +241,17 @@ function renderTutorial(): void {
 
   tutorialTitleElement.textContent = step.title;
   tutorialDescriptionElement.textContent = step.description;
+  tutorialExampleElement.hidden = isWelcome;
+  tutorialProgressRowElement.hidden = isWelcome;
   tutorialScoreElement.textContent = String(displayedScore);
   tutorialPerfectElement.textContent = String(TUTORIAL_PERFECT);
   tutorialParElement.textContent = String(TUTORIAL_PAR);
   tutorialCoveredElement.textContent = String(coveredTiles.size);
-  tutorialStepCountElement.textContent = `Step ${tutorialStepIndex + 1} of ${
-    TUTORIAL_STEPS.length
+  tutorialStepCountElement.textContent = `Step ${tutorialStepIndex} of ${
+    TUTORIAL_STEPS.length - 1
   }`;
-  tutorialBackButton.disabled = tutorialStepIndex === 0;
+  tutorialBackButton.hidden = isWelcome;
+  tutorialBackButton.disabled = isWelcome;
   tutorialNextButton.textContent =
     tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "Let’s play" : "Next";
 
@@ -300,10 +308,10 @@ function renderTutorial(): void {
 
   renderTutorialWords(step.showOptimalSolution, displayedWords);
   tutorialProgressElement.replaceChildren(
-    ...TUTORIAL_STEPS.map((_, index) => {
+    ...TUTORIAL_STEPS.slice(1).map((_, index) => {
       const dot = document.createElement("span");
       dot.className = "tutorial-dot";
-      dot.classList.toggle("current", index === tutorialStepIndex);
+      dot.classList.toggle("current", index + 1 === tutorialStepIndex);
       return dot;
     }),
   );

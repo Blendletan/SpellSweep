@@ -218,20 +218,20 @@ Playtesting feedback recorded September 10, 2026 identified five concrete intera
 - Covered and uncovered tiles need substantially stronger visual separation.
 - Reveal Answer must remain available after a solved puzzle without changing the completed result or the content shared for that win.
 
-- [ ] Play multiple debug-mode boards on a desktop computer.
+- [x] Play multiple debug-mode boards on a desktop computer.
 - [x] Confirm that the game is practically playable on desktop, phones, and touchscreens.
-- [ ] Continue evaluating touchscreen wildcard entry and other detailed touch interactions.
-- [ ] Continue evaluating phone layout, text size, controls, and scrolling as the interface changes.
+- [x] Continue evaluating touchscreen wildcard entry and other detailed touch interactions.
+- [x] Continue evaluating phone layout, text size, controls, and scrolling as the interface changes.
 - [x] Confirm that the Reveal Answer mechanic and solution display are understandable in normal play.
-- [ ] Continue testing Reveal Answer cancellation, confirmation, and path inspection on each relevant device as the interface changes.
-- [ ] Test native sharing or its fallback on desktop and mobile.
-- [ ] Record typical word counts and how they compare with Perfect and Par.
+- [x] Continue testing Reveal Answer cancellation, confirmation, and path inspection on each relevant device as the interface changes.
+- [x] Test native sharing or its fallback on desktop and mobile.
+- [x] Record typical word counts and how they compare with Perfect and Par.
 - [x] Confirm that generated boards are solvable in practice, not merely in theory.
-- [ ] Record whether difficulty comes from the rules, generated letters, obscure dictionary words, or interaction friction.
-- [ ] Record accessibility and keyboard issues observed during real use.
-- [ ] Decide which findings require rule changes and which require interface changes.
+- [x] Record whether difficulty comes from the rules, generated letters, obscure dictionary words, or interaction friction.
+- [x] Record accessibility and keyboard issues observed during real use.
+- [x] Decide which findings require rule changes and which require interface changes.
 
-Completion criteria: there is enough evidence from desktop, touchscreen, and phone use to make targeted changes without guessing.
+Completion criteria: there is enough evidence from desktop, touchscreen, and phone use to make targeted changes without guessing. Complete.
 
 ## Milestone 14: Interaction, Mobile, and Accessibility Corrections
 
