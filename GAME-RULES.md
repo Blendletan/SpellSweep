@@ -277,6 +277,8 @@ The puzzle does not persist between refreshes.
 
 This mode exists so that many puzzles can be played quickly during development and playtesting.
 
+There is no in-page restart or new-puzzle button in either mode. Refreshing the page restarts the current daily puzzle in daily mode and produces a fresh puzzle in debug mode.
+
 There should be no additional mode-selection framework or configuration system. This single boolean is the intended switch.
 
 ---

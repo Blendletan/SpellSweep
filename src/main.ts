@@ -41,7 +41,6 @@ const wildcardInput = requiredElement<HTMLInputElement>("wildcard-letter");
 const submitButton = requiredElement<HTMLButtonElement>("submit-word");
 const clearButton = requiredElement<HTMLButtonElement>("clear-path");
 const messageElement = requiredElement<HTMLParagraphElement>("message");
-const newPuzzleButton = requiredElement<HTMLButtonElement>("new-puzzle");
 const revealAnswerButton = requiredElement<HTMLButtonElement>("reveal-answer");
 const revealedAnswerElement = requiredElement<HTMLElement>("revealed-answer");
 const answerSummaryElement = requiredElement<HTMLParagraphElement>("answer-summary");
@@ -103,7 +102,6 @@ let tutorialStepIndex = 0;
 
 submitButton.addEventListener("click", submitSelection);
 clearButton.addEventListener("click", clearSelection);
-newPuzzleButton.addEventListener("click", () => startPuzzle());
 revealAnswerButton.addEventListener("click", requestRevealAnswer);
 cancelRevealButton.addEventListener("click", () => {
   revealWarningDialog.close();
@@ -153,9 +151,7 @@ async function loadGame(): Promise<void> {
 
     dictionary = createDictionaryIndex(parseDictionary(await response.text()));
     startPuzzle();
-    newPuzzleButton.disabled = false;
     revealAnswerButton.disabled = false;
-    newPuzzleButton.textContent = DAILY_MODE ? "Restart today's puzzle" : "New puzzle";
     if (!hasSeenTutorial()) {
       openTutorial();
     }

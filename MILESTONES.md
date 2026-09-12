@@ -121,7 +121,7 @@ Completion criteria: the important game rules can be verified without interactin
 - [x] Show accepted-word count and elapsed time.
 - [x] Give understandable invalid-submission feedback.
 - [x] Show the result immediately on completion.
-- [x] Provide an appropriate restart or new-puzzle action.
+- [x] Rely on page refresh for restarting or loading a new puzzle; provide no separate in-page button.
 
 Use ordinary HTML, CSS, and TypeScript. The UI should call the tested game logic rather than duplicate it. Visual simplicity is acceptable at this stage.
 
