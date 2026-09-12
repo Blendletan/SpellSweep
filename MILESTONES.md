@@ -308,7 +308,7 @@ Completion criteria: the game contains no timer or pause behavior; the only play
 - [ ] Refine feedback and restrained animations where useful.
 - [ ] Produce and test the final static build.
 - [ ] Verify relative paths and required assets on GitHub Pages.
-- [ ] Set the intended release value of `DAILY_MODE`.
+- [x] Set the intended release value of `DAILY_MODE`.
 - [ ] Re-test daily puzzle persistence and local-midnight behavior when daily mode is enabled.
 - [ ] Verify the final deployed game on desktop and mobile.
 
@@ -355,16 +355,18 @@ Completion criteria: a first-time player is automatically shown a concise walkth
 
 ## Milestone 18: GoatCounter Analytics
 
-- [ ] Create or confirm the GoatCounter site and obtain its public site code.
-- [ ] Add GoatCounter's smallest supported page-view integration to the static site.
-- [ ] Record one custom event whenever a player activates the Share Result button.
-- [ ] Count the share-button activation without including the puzzle, score, share text, or other player-entered data.
-- [ ] Ensure analytics failure or blocking never interferes with gameplay or sharing.
-- [ ] Add a brief privacy disclosure if the final GoatCounter configuration or applicable policy requires one.
+- [x] Create or confirm the GoatCounter site and obtain its public site code.
+- [x] Add GoatCounter's smallest supported page-view integration to the static site.
+- [x] Record one custom event whenever a player activates the Share Result button.
+- [x] Count the share-button activation without including the puzzle, score, share text, or other player-entered data.
+- [x] Ensure analytics failure or blocking never interferes with gameplay or sharing.
+- [x] Add a brief privacy disclosure if the final GoatCounter configuration or applicable policy requires one.
 - [ ] Verify production page-view counting on GitHub Pages.
 - [ ] Verify the Share Result event is counted once per button activation on desktop and mobile.
 
 Keep analytics limited to aggregate page visits and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The separate first-party functional cookie required by Milestone 17 stores only whether the tutorial has already been shown and must not be sent to GoatCounter.
+
+Implementation progress (September 11, 2026): SpellSweep now uses the confirmed `blendletan` GoatCounter site code for ordinary page views and a single constant `spellsweep-share-result` event on the result-copy button. The declarative click integration contains no puzzle, score, share text, or player-entered values, and blocked analytics remains independent of the game's own click handler. No additional in-game privacy disclosure was added for this cookie-free aggregate configuration; re-evaluate that decision if the analytics settings or applicable policy change. Production dashboard confirmation and desktop/mobile event checks remain part of the final one-to-two-day launch test.
 
 Completion criteria: GoatCounter reports public-site visits and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those two aggregate events.
 

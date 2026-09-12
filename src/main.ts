@@ -26,7 +26,7 @@ import {
   TUTORIAL_SUBOPTIMAL_WORDS,
 } from "./tutorial.js";
 
-const DAILY_MODE = false;
+const DAILY_MODE = true;
 const TUTORIAL_COOKIE_NAME = "spellsweepTutorialSeen";
 const TUTORIAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 
