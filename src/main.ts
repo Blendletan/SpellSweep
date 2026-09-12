@@ -2,9 +2,11 @@ import {
   areAdjacent,
   createDictionaryIndex,
   createGame,
+  dailyPuzzleNumber,
   findMinimumWordSolution,
   giveUp,
   isGameOver,
+  isValidPath,
   localDateKey,
   PAR_MARGIN,
   parseDictionary,
@@ -12,6 +14,7 @@ import {
   selectPuzzle,
   shareText,
   submitWord,
+  TILE_COUNT,
   WILDCARD,
   type DictionaryIndex,
   type GameState,
@@ -27,8 +30,22 @@ import {
 } from "./tutorial.js";
 
 const DAILY_MODE = true;
+const DAILY_PROGRESS_COOKIE_NAME = "spellsweepDailyProgress";
 const TUTORIAL_COOKIE_NAME = "spellsweepTutorialSeen";
 const TUTORIAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
+
+type SavedDailyProgress = {
+  dateKey: string;
+  board: string;
+  covered: string;
+  wordsUsed: number;
+  completed: boolean;
+  gaveUp: boolean;
+  answerRevealed: boolean;
+  selectedPath: number[];
+  wildcardLetter: string;
+  selectedAnswerIndex: number;
+};
 
 const boardElement = requiredElement<HTMLDivElement>("board");
 const scoreElement = requiredElement<HTMLElement>("score-value");
@@ -51,6 +68,9 @@ const closeResultDialogButton = requiredElement<HTMLButtonElement>(
   "close-result-dialog",
 );
 const copyResultButton = requiredElement<HTMLButtonElement>("copy-result");
+const resultDialogTitleElement = requiredElement<HTMLHeadingElement>(
+  "result-dialog-title",
+);
 const resultDialogSummaryElement = requiredElement<HTMLParagraphElement>(
   "result-dialog-summary",
 );
@@ -98,6 +118,7 @@ let minimumSolution: readonly WordPath[] = [];
 let answerRevealed = false;
 let selectedAnswerIndex = 0;
 let activeDateKey = localDateKey(new Date());
+let activePuzzleNumber = dailyPuzzleNumber(new Date());
 let tutorialStepIndex = 0;
 
 submitButton.addEventListener("click", submitSelection);
@@ -136,6 +157,7 @@ copyResultButton.addEventListener("click", () => void copyShareResult());
 wildcardInput.addEventListener("input", () => {
   wildcardInput.value = wildcardInput.value.replace(/[^a-z]/gi, "").slice(0, 1);
   renderSelection();
+  persistDailyProgress();
 });
 document.addEventListener("keydown", handleKeyDown);
 
@@ -165,18 +187,23 @@ function startPuzzle(): void {
   if (resultDialog.open) {
     resultDialog.close();
   }
-  game = createGame(selectPuzzle(dictionary, DAILY_MODE));
-  selectedPath = [];
+
+  const now = new Date();
+  activeDateKey = localDateKey(now);
+  activePuzzleNumber = dailyPuzzleNumber(now);
+  const saved = DAILY_MODE ? loadDailyProgress(activeDateKey) : undefined;
+  game = saved?.game ?? createGame(selectPuzzle(dictionary, DAILY_MODE, now));
+  selectedPath = saved?.selectedPath ?? [];
   minimumSolution = findMinimumWordSolution(game.board, dictionary);
-  answerRevealed = false;
-  selectedAnswerIndex = 0;
-  wildcardInput.value = "";
-  activeDateKey = localDateKey(new Date());
-  render();
-  showMessage(
-    DAILY_MODE ? "Today's puzzle is ready." : "A new test puzzle is ready.",
-    "neutral",
+  answerRevealed = saved?.answerRevealed ?? false;
+  selectedAnswerIndex = Math.min(
+    saved?.selectedAnswerIndex ?? 0,
+    Math.max(0, minimumSolution.length - 1),
   );
+  wildcardInput.value = saved?.wildcardLetter ?? "";
+  render();
+  showMessage("", "neutral");
+  persistDailyProgress();
 }
 
 function chooseTile(tileIndex: number): void {
@@ -202,6 +229,7 @@ function chooseTile(tileIndex: number): void {
   }
 
   render();
+  persistDailyProgress();
 }
 
 function clearSelection(): void {
@@ -209,6 +237,7 @@ function clearSelection(): void {
   wildcardInput.value = "";
   showMessage("Selection cleared.", "neutral");
   render();
+  persistDailyProgress();
 }
 
 function handleKeyDown(event: KeyboardEvent): void {
@@ -418,6 +447,119 @@ function rememberTutorialSeen(): void {
   document.cookie = `${TUTORIAL_COOKIE_NAME}=1; Max-Age=${TUTORIAL_COOKIE_MAX_AGE}; Path=/; SameSite=Lax`;
 }
 
+function loadDailyProgress(dateKey: string): {
+  game: GameState;
+  answerRevealed: boolean;
+  selectedPath: number[];
+  wildcardLetter: string;
+  selectedAnswerIndex: number;
+} | undefined {
+  const encodedProgress = readCookie(DAILY_PROGRESS_COOKIE_NAME);
+  if (!encodedProgress) {
+    return undefined;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(decodeURIComponent(encodedProgress));
+    if (typeof parsed !== "object" || parsed === null) {
+      return undefined;
+    }
+
+    const saved = parsed as Partial<SavedDailyProgress>;
+    if (
+      saved.dateKey !== dateKey ||
+      typeof saved.board !== "string" ||
+      typeof saved.covered !== "string" ||
+      !new RegExp(`^[01]{${TILE_COUNT}}$`).test(saved.covered) ||
+      typeof saved.wordsUsed !== "number" ||
+      !Number.isInteger(saved.wordsUsed) ||
+      saved.wordsUsed < 0 ||
+      typeof saved.completed !== "boolean" ||
+      typeof saved.gaveUp !== "boolean" ||
+      typeof saved.answerRevealed !== "boolean" ||
+      !Array.isArray(saved.selectedPath) ||
+      !saved.selectedPath.every(Number.isInteger) ||
+      !isValidPath(saved.selectedPath) ||
+      typeof saved.wildcardLetter !== "string" ||
+      !/^[a-z]?$/.test(saved.wildcardLetter) ||
+      typeof saved.selectedAnswerIndex !== "number" ||
+      !Number.isInteger(saved.selectedAnswerIndex) ||
+      saved.selectedAnswerIndex < 0
+    ) {
+      return undefined;
+    }
+
+    const board = saved.board.split("");
+    createGame(board);
+    const covered = saved.covered.split("").map((value) => value === "1");
+    const completed = saved.completed;
+    const gaveUp = saved.gaveUp;
+    const answerRevealed = saved.answerRevealed;
+
+    if (
+      completed !== covered.every(Boolean) ||
+      (completed && gaveUp) ||
+      (answerRevealed && !completed && !gaveUp) ||
+      (gaveUp && !answerRevealed) ||
+      ((completed || gaveUp) && saved.selectedPath.length > 0)
+    ) {
+      return undefined;
+    }
+
+    return {
+      game: {
+        board,
+        covered,
+        wordsUsed: saved.wordsUsed,
+        completed,
+        gaveUp,
+      },
+      answerRevealed,
+      selectedPath: saved.selectedPath,
+      wildcardLetter: saved.wildcardLetter,
+      selectedAnswerIndex: saved.selectedAnswerIndex,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function persistDailyProgress(): void {
+  if (!DAILY_MODE || !game) {
+    return;
+  }
+
+  const saved: SavedDailyProgress = {
+    dateKey: activeDateKey,
+    board: game.board.join(""),
+    covered: game.covered.map((value) => (value ? "1" : "0")).join(""),
+    wordsUsed: game.wordsUsed,
+    completed: game.completed,
+    gaveUp: game.gaveUp,
+    answerRevealed,
+    selectedPath,
+    wildcardLetter: wildcardInput.value,
+    selectedAnswerIndex,
+  };
+  const expires = new Date();
+  expires.setHours(24, 0, 0, 0);
+
+  try {
+    document.cookie = `${DAILY_PROGRESS_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(saved))}; Expires=${expires.toUTCString()}; Path=/; SameSite=Lax`;
+  } catch {
+    // The game remains playable when cookies are unavailable.
+  }
+}
+
+function readCookie(name: string): string | undefined {
+  const prefix = `${name}=`;
+  return document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(prefix))
+    ?.slice(prefix.length);
+}
+
 function submitSelection(): void {
   const word = selectedWord();
   const result = submitWord(game, selectedPath, word, dictionary.words);
@@ -430,6 +572,7 @@ function submitSelection(): void {
       word ? `${word.toUpperCase()} is not in the dictionary.` : "That selection is not a valid word.",
       "error",
     );
+    persistDailyProgress();
     return;
   }
 
@@ -448,6 +591,7 @@ function submitSelection(): void {
   }
 
   render();
+  persistDailyProgress();
   if (game.completed) {
     openResultDialog();
   }
@@ -479,6 +623,7 @@ function revealAnswer(): void {
   answerRevealed = true;
   selectedAnswerIndex = 0;
   render();
+  persistDailyProgress();
   showMessage(
     completedBeforeReveal
       ? "Answer revealed. Your winning result is unchanged."
@@ -493,6 +638,7 @@ function openResultDialog(): void {
     return;
   }
 
+  resultDialogTitleElement.textContent = `SpellSweep #${activePuzzleNumber}`;
   resultDialogSummaryElement.textContent = resultSummary(game, minimumSolution.length);
   resultShareStatusElement.textContent = "";
   manualShareElement.hidden = true;
@@ -508,7 +654,12 @@ async function copyShareResult(): Promise<void> {
     return;
   }
 
-  const text = shareText(game, window.location.href, minimumSolution.length);
+  const text = shareText(
+    game,
+    window.location.href,
+    minimumSolution.length,
+    activePuzzleNumber,
+  );
 
   try {
     await navigator.clipboard.writeText(text);
@@ -632,6 +783,7 @@ function renderAnswer(): void {
       button.addEventListener("click", () => {
         selectedAnswerIndex = index;
         render();
+        persistDailyProgress();
       });
       return button;
     }),

@@ -6,6 +6,7 @@ import {
   assertValidBoard,
   createDictionaryIndex,
   createGame,
+  dailyPuzzleNumber,
   findMinimumWordSolution,
   generateCandidateBoard,
   giveUp,
@@ -294,6 +295,7 @@ test("minimum solution returns legal paths covering the full board", () => {
 
 test("share text reflects Perfect, under-par, par, and over-par wins", () => {
   const pageUrl = "https://example.com/spellsweep/";
+  const puzzleNumber = 23;
   const wonWith = (wordsUsed: number) => ({
     ...createGame(boardWith()),
     wordsUsed,
@@ -301,20 +303,20 @@ test("share text reflects Perfect, under-par, par, and over-par wins", () => {
   });
 
   assert.equal(
-    shareText(wonWith(4), pageUrl, 4),
-    `SpellSweep\n4 words · Perfect score\n🟨🟨🟨🟨\n${pageUrl}`,
+    shareText(wonWith(4), pageUrl, 4, puzzleNumber),
+    `SpellSweep #23\n4 words · Perfect score\n🟨🟨🟨🟨\n${pageUrl}`,
   );
   assert.equal(
-    shareText(wonWith(6), pageUrl, 4),
-    `SpellSweep\n6 words · beat par by 1\n🟨🟨🟨🟨🟦🟦\n${pageUrl}`,
+    shareText(wonWith(6), pageUrl, 4, puzzleNumber),
+    `SpellSweep #23\n6 words · beat par by 1\n🟨🟨🟨🟨🟦🟦\n${pageUrl}`,
   );
   assert.equal(
-    shareText(wonWith(7), pageUrl, 4),
-    `SpellSweep\n7 words · made par\n🟨🟨🟨🟨🟦🟦🟦\n${pageUrl}`,
+    shareText(wonWith(7), pageUrl, 4, puzzleNumber),
+    `SpellSweep #23\n7 words · made par\n🟨🟨🟨🟨🟦🟦🟦\n${pageUrl}`,
   );
   assert.equal(
-    shareText(wonWith(9), pageUrl, 4),
-    `SpellSweep\n9 words · +2 over par\n🟨🟨🟨🟨🟦🟦🟦🟥🟥\n${pageUrl}`,
+    shareText(wonWith(9), pageUrl, 4, puzzleNumber),
+    `SpellSweep #23\n9 words · +2 over par\n🟨🟨🟨🟨🟦🟦🟦🟥🟥\n${pageUrl}`,
   );
 });
 
@@ -323,10 +325,10 @@ test("gave-up share text has no score cells", () => {
   const lost = giveUp(createGame(boardWith()));
 
   assert.equal(
-    shareText(lost, pageUrl, 4),
-    `SpellSweep\nThis one beat me!\n${pageUrl}`,
+    shareText(lost, pageUrl, 4, 23),
+    `SpellSweep #23\nThis one beat me!\n${pageUrl}`,
   );
-  assert.throws(() => shareText(createGame(boardWith()), pageUrl, 4));
+  assert.throws(() => shareText(createGame(boardWith()), pageUrl, 4, 23));
 });
 
 test("finding an answer after completion does not change the winning share result", () => {
@@ -337,10 +339,17 @@ test("finding an answer after completion does not change the winning share resul
     wordsUsed: 4,
     completed: true,
   };
-  const beforeReveal = shareText(won, pageUrl, 4);
+  const beforeReveal = shareText(won, pageUrl, 4, 23);
 
   findMinimumWordSolution(won.board, createDictionaryIndex(new Set(["aa"])));
 
-  assert.equal(shareText(won, pageUrl, 4), beforeReveal);
+  assert.equal(shareText(won, pageUrl, 4, 23), beforeReveal);
   assert.equal(giveUp(won), won);
+});
+
+test("daily puzzle numbers count local calendar days from release day", () => {
+  assert.equal(dailyPuzzleNumber(new Date(2026, 8, 11, 23, 59)), 1);
+  assert.equal(dailyPuzzleNumber(new Date(2026, 8, 12)), 1);
+  assert.equal(dailyPuzzleNumber(new Date(2026, 8, 13)), 2);
+  assert.equal(dailyPuzzleNumber(new Date(2027, 8, 12)), 366);
 });

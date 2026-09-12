@@ -185,7 +185,7 @@ The game should include an option to share their score once the game is complete
 
 The share option should be available as either a text or a graphic that they can share
 
-In either case it should include the player's word-count score and a link to the webpage the game is located at
+In either case it should include the title `SpellSweep #N`, where `N` is the daily puzzle number, the player's word-count score, and a link to the webpage the game is located at
 
 If the player gave up and revealed the solution then the share card should say "This one beat me!" instead of the word-count score
 
@@ -259,6 +259,10 @@ Refreshing the page during the same day must continue to produce the same daily 
 
 The puzzle identity therefore persists for the duration of that local calendar day.
 
+The current puzzle state also persists in a first-party functional cookie until local midnight. Leaving and returning on the same day must restore the covered tiles, word count, completion or reveal result, and any word path currently being selected.
+
+Daily puzzles are numbered consecutively from SpellSweep #1 on September 12, 2026. The number appears in shared results but is not otherwise displayed in the interface.
+
 ---
 
 ## Debug / Testing Mode
@@ -273,7 +277,7 @@ the game is in development/testing mode.
 
 A new valid random puzzle is generated or selected on every page refresh.
 
-The puzzle does not persist between refreshes.
+The puzzle and its progress do not persist between refreshes.
 
 This mode exists so that many puzzles can be played quickly during development and playtesting.
 

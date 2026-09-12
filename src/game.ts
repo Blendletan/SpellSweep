@@ -3,6 +3,7 @@ export const TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
 export const WILDCARD_INDEX = 12;
 export const WILDCARD = "?";
 export const PAR_MARGIN = 3;
+export const FIRST_PUZZLE_DATE = "2026-09-12";
 
 export type Board = readonly string[];
 
@@ -446,10 +447,11 @@ export function shareText(
   state: GameState,
   pageUrl: string,
   perfectScore: number,
+  puzzleNumber: number,
 ): string {
   const summary = resultSummary(state, perfectScore);
   if (state.gaveUp) {
-    return `SpellSweep\n${summary}\n${pageUrl}`;
+    return `SpellSweep #${puzzleNumber}\n${summary}\n${pageUrl}`;
   }
 
   const parScore = perfectScore + PAR_MARGIN;
@@ -458,7 +460,7 @@ export function shareText(
     Math.max(0, Math.min(state.wordsUsed, parScore) - perfectScore),
   );
   const overParCells = "🟥".repeat(Math.max(0, state.wordsUsed - parScore));
-  return `SpellSweep\n${summary}\n${perfectCells}${parCells}${overParCells}\n${pageUrl}`;
+  return `SpellSweep #${puzzleNumber}\n${summary}\n${perfectCells}${parCells}${overParCells}\n${pageUrl}`;
 }
 
 export function generateCandidateBoard(random: RandomSource = Math.random): Board {
@@ -488,6 +490,13 @@ export function localDateKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+export function dailyPuzzleNumber(date: Date): number {
+  const [firstYear, firstMonth, firstDay] = FIRST_PUZZLE_DATE.split("-").map(Number);
+  const firstPuzzleTime = Date.UTC(firstYear, firstMonth - 1, firstDay);
+  const puzzleTime = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.max(1, Math.round((puzzleTime - firstPuzzleTime) / 86_400_000) + 1);
 }
 
 export function seededRandom(seedText: string): RandomSource {

@@ -367,11 +367,24 @@ Completion criteria: a first-time player is automatically shown a concise walkth
 - [ ] Verify the confirmed give-up event is counted once on desktop and mobile and is not emitted by post-win answer views.
 - [ ] Verify the Share Result event is counted once per button activation on desktop and mobile.
 
-Keep analytics limited to aggregate page visits, confirmed unfinished-puzzle reveals, and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The separate first-party functional cookie required by Milestone 17 stores only whether the tutorial has already been shown and must not be sent to GoatCounter.
+Keep analytics limited to aggregate page visits, confirmed unfinished-puzzle reveals, and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The first-party functional cookies used for tutorial dismissal and same-day puzzle progress must not be sent to GoatCounter.
 
 Implementation progress (September 11, 2026): SpellSweep now uses the confirmed `blendletan` GoatCounter site code for ordinary page views, a constant `spellsweep-puzzle-revealed` event on the unfinished-run reveal confirmation, and a constant `spellsweep-share-result` event on the result-copy button. Post-win answer views do not emit the reveal event. The declarative click integrations contain no puzzle, score, solution, share text, or player-entered values, and blocked analytics remains independent of the game's own click handlers. No additional in-game privacy disclosure was added for this cookie-free aggregate configuration; re-evaluate that decision if the analytics settings or applicable policy change. Production dashboard confirmation and desktop/mobile event checks remain part of the final one-to-two-day launch test.
 
 Completion criteria: GoatCounter reports public-site visits, confirmed give-ups, and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those three aggregate events.
+
+## Milestone 19: Release-State Persistence and Puzzle Numbers
+
+- [x] Store daily game progress in a first-party functional cookie that expires at local midnight.
+- [x] Restore covered tiles, score, end state, revealed answer, and the current tile selection when the player returns during the same local day.
+- [x] Ignore missing, stale, or malformed progress without preventing the game from loading.
+- [x] Number daily puzzles consecutively from SpellSweep #1 on September 12, 2026 using local calendar dates.
+- [x] Include the puzzle number in every completed and gave-up shared result without displaying it elsewhere.
+- [x] Remove the initial “Today's puzzle is ready.” message.
+- [x] Manually verify same-day restoration in the browser.
+- [ ] Manually verify next-day expiry in the browser.
+
+Completion criteria: a player can leave and resume the current day's puzzle, shared results identify the daily puzzle number, and the initial interface contains no redundant ready message.
 
 ## Ongoing Constraints
 
