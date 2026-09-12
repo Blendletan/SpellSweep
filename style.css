@@ -541,7 +541,7 @@ button:disabled {
   margin: 2rem auto 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid #d1d5db;
-  font-size: 0.9rem;
+  font-size: 17px;
 }
 
 .site-footer a {
