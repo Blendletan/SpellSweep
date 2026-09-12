@@ -3,13 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpellSweep</title>
+    <title>SpellSweep — RMLP</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/rmlp-logo-mark.svg" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main>
       <div class="title-row">
-        <h1>SpellSweep</h1>
+        <div class="brand-title">
+          <img
+            class="brand-mark"
+            src="./assets/rmlp-logo-mark.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <h1>SpellSweep</h1>
+        </div>
         <button id="show-tutorial" class="show-tutorial" type="button">
           How to play
         </button>
@@ -140,7 +149,40 @@
           <button id="confirm-reveal" type="button">Reveal solution</button>
         </div>
       </dialog>
+
+      <dialog
+        id="result-dialog"
+        class="result-dialog"
+        aria-labelledby="result-dialog-title"
+        aria-describedby="result-dialog-summary"
+      >
+        <button
+          id="close-result-dialog"
+          class="close-result-dialog"
+          type="button"
+          aria-label="Close result"
+        >
+          ×
+        </button>
+        <h2 id="result-dialog-title">SpellSweep</h2>
+        <p id="result-dialog-summary" class="result-dialog-summary"></p>
+        <button id="copy-result" type="button">Share result</button>
+        <p id="result-share-status" class="result-share-status" aria-live="polite"></p>
+        <div id="manual-share" class="manual-share" hidden>
+          <label for="manual-share-text">Copy your result manually</label>
+          <textarea id="manual-share-text" rows="5" readonly></textarea>
+        </div>
+      </dialog>
     </main>
+
+    <footer class="site-footer">
+      <a href="mailto:robertparkinson@shaw.ca">Send feedback</a>
+      <a
+        href="https://www.paypal.com/paypalme/AceBlender"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Support more puzzles ☕</a>
+    </footer>
 
     <script type="module" src="./build/main.js"></script>
   </body>

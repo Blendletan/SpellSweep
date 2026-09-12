@@ -292,6 +292,18 @@ Completion criteria: the game contains no timer or pause behavior; the only play
 
 ## Milestone 16: Final Visual Polish and Deployment Verification
 
+- [x] Keep SpellSweep's visual direction independent from Word Web except for the specific shared-series elements listed below; do not copy Word Web's colors, fonts, page layout, buttons, corkboard treatment, bubbles, or other styling.
+- [x] Change the browser title to `SpellSweep — RMLP`, matching Word Web's series-level title treatment while leaving the visible game name as SpellSweep.
+- [x] Copy `assets/rmlp-logo-mark.svg` from the WordWebDebug repository and use the small RMLP mark beside the SpellSweep heading and as the favicon; do not import the full Word Web lockup or broader brand styling.
+- [x] Keep Share Result unavailable until the player completes the puzzle or gives up.
+- [x] Remove native sharing, canvas/image sharing, and downloads; Share Result should only copy plain text to the clipboard.
+- [x] Adapt Word Web's result language to SpellSweep's score: `Perfect score`, `beat par by N`, `made par`, `+N over par`, or `This one beat me!` after giving up, followed by the SpellSweep webpage link.
+- [x] Use a simple Word Web-style emoji-cell row in completed-result text when it remains clear and legible; do not include score cells in a gave-up result.
+- [x] Immediately after either completion or giving up, open a gentle, keyboard-accessible, dismissible result dialog containing the outcome and one Share Result button.
+- [x] Keep a post-game Share Result control available after the result dialog is dismissed so the player can copy the result again.
+- [x] After a successful copy, show `Copied! Paste it anywhere.`; if clipboard access fails, reveal the plain text in a read-only control for manual copying.
+- [x] Add a compact footer containing only `Send feedback` linking to `mailto:robertparkinson@shaw.ca` and `Support more puzzles ☕` linking to `https://www.paypal.com/paypalme/AceBlender`.
+- [ ] Add focused tests for every completed and gave-up share-text variant, and manually verify share visibility, dialog dismissal and reopening, keyboard behavior, clipboard success and fallback, and phone-sized presentation without adding a UI framework or test framework.
 - [ ] Improve typography, spacing, and board appearance after interaction stabilizes.
 - [ ] Refine feedback and restrained animations where useful.
 - [ ] Produce and test the final static build.
@@ -299,6 +311,8 @@ Completion criteria: the game contains no timer or pause behavior; the only play
 - [ ] Set the intended release value of `DAILY_MODE`.
 - [ ] Re-test daily puzzle persistence and local-midnight behavior when daily mode is enabled.
 - [ ] Verify the final deployed game on desktop and mobile.
+
+Implementation progress (September 11, 2026): the approved shared-series elements are implemented without changing SpellSweep's broader visual language. The result flow now uses an accessible in-page dialog and clipboard-only text, with focused coverage for all score descriptions and the gave-up result. The complete 26-test suite passes, TypeScript compiles, required local assets return successfully, and browser checks verified the active/post-game share visibility, gave-up dialog, successful copy feedback, close and Escape dismissal, reopening, footer links, and desktop and phone-sized layouts. The manual-copy fallback and completed-game dialog remain to be exercised in the next broader browser pass; production deployment and the remaining general polish items are still pending.
 
 Completion criteria: the stabilized game is attractive, accessible, and verified on its final static GitHub Pages deployment.
 

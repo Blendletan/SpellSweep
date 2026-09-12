@@ -292,24 +292,41 @@ test("minimum solution returns legal paths covering the full board", () => {
   }
 });
 
-test("share text reflects a win or a revealed answer", () => {
+test("share text reflects Perfect, under-par, par, and over-par wins", () => {
   const pageUrl = "https://example.com/spellsweep/";
-  const won = {
+  const wonWith = (wordsUsed: number) => ({
     ...createGame(boardWith()),
-    wordsUsed: 4,
+    wordsUsed,
     completed: true,
-  };
+  });
+
+  assert.equal(
+    shareText(wonWith(4), pageUrl, 4),
+    `SpellSweep\n4 words · Perfect score\n🟨🟨🟨🟨\n${pageUrl}`,
+  );
+  assert.equal(
+    shareText(wonWith(6), pageUrl, 4),
+    `SpellSweep\n6 words · beat par by 1\n🟨🟨🟨🟨🟦🟦\n${pageUrl}`,
+  );
+  assert.equal(
+    shareText(wonWith(7), pageUrl, 4),
+    `SpellSweep\n7 words · made par\n🟨🟨🟨🟨🟦🟦🟦\n${pageUrl}`,
+  );
+  assert.equal(
+    shareText(wonWith(9), pageUrl, 4),
+    `SpellSweep\n9 words · +2 over par\n🟨🟨🟨🟨🟦🟦🟦🟥🟥\n${pageUrl}`,
+  );
+});
+
+test("gave-up share text has no score cells", () => {
+  const pageUrl = "https://example.com/spellsweep/";
   const lost = giveUp(createGame(boardWith()));
 
   assert.equal(
-    shareText(won, pageUrl),
-    `SpellSweep\n4 words\n${pageUrl}`,
-  );
-  assert.equal(
-    shareText(lost, pageUrl),
+    shareText(lost, pageUrl, 4),
     `SpellSweep\nThis one beat me!\n${pageUrl}`,
   );
-  assert.throws(() => shareText(createGame(boardWith()), pageUrl));
+  assert.throws(() => shareText(createGame(boardWith()), pageUrl, 4));
 });
 
 test("finding an answer after completion does not change the winning share result", () => {
@@ -320,10 +337,10 @@ test("finding an answer after completion does not change the winning share resul
     wordsUsed: 4,
     completed: true,
   };
-  const beforeReveal = shareText(won, pageUrl);
+  const beforeReveal = shareText(won, pageUrl, 4);
 
   findMinimumWordSolution(won.board, createDictionaryIndex(new Set(["aa"])));
 
-  assert.equal(shareText(won, pageUrl), beforeReveal);
+  assert.equal(shareText(won, pageUrl, 4), beforeReveal);
   assert.equal(giveUp(won), won);
 });

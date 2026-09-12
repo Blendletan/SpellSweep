@@ -418,15 +418,47 @@ export function minimumWordCover(
   return bestSolution.map((candidate) => candidate.wordPath);
 }
 
-export function shareText(state: GameState, pageUrl: string): string {
+export function resultSummary(state: GameState, perfectScore: number): string {
   if (state.gaveUp) {
-    return `SpellSweep\nThis one beat me!\n${pageUrl}`;
+    return "This one beat me!";
   }
-  if (state.completed) {
-    const wordLabel = state.wordsUsed === 1 ? "word" : "words";
-    return `SpellSweep\n${state.wordsUsed} ${wordLabel}\n${pageUrl}`;
+  if (!state.completed) {
+    throw new Error("A result is only available after the game ends.");
   }
-  throw new Error("A game can only be shared after it ends.");
+
+  const wordLabel = state.wordsUsed === 1 ? "word" : "words";
+  const score = `${state.wordsUsed} ${wordLabel}`;
+  const parScore = perfectScore + PAR_MARGIN;
+
+  if (state.wordsUsed <= perfectScore) {
+    return `${score} · Perfect score`;
+  }
+  if (state.wordsUsed < parScore) {
+    return `${score} · beat par by ${parScore - state.wordsUsed}`;
+  }
+  if (state.wordsUsed === parScore) {
+    return `${score} · made par`;
+  }
+  return `${score} · +${state.wordsUsed - parScore} over par`;
+}
+
+export function shareText(
+  state: GameState,
+  pageUrl: string,
+  perfectScore: number,
+): string {
+  const summary = resultSummary(state, perfectScore);
+  if (state.gaveUp) {
+    return `SpellSweep\n${summary}\n${pageUrl}`;
+  }
+
+  const parScore = perfectScore + PAR_MARGIN;
+  const perfectCells = "🟨".repeat(Math.min(state.wordsUsed, perfectScore));
+  const parCells = "🟦".repeat(
+    Math.max(0, Math.min(state.wordsUsed, parScore) - perfectScore),
+  );
+  const overParCells = "🟥".repeat(Math.max(0, state.wordsUsed - parScore));
+  return `SpellSweep\n${summary}\n${perfectCells}${parCells}${overParCells}\n${pageUrl}`;
 }
 
 export function generateCandidateBoard(random: RandomSource = Math.random): Board {

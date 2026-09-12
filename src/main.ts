@@ -8,6 +8,7 @@ import {
   localDateKey,
   PAR_MARGIN,
   parseDictionary,
+  resultSummary,
   selectPuzzle,
   shareText,
   submitWord,
@@ -46,6 +47,21 @@ const revealedAnswerElement = requiredElement<HTMLElement>("revealed-answer");
 const answerSummaryElement = requiredElement<HTMLParagraphElement>("answer-summary");
 const answerWordsElement = requiredElement<HTMLDivElement>("answer-words");
 const shareResultButton = requiredElement<HTMLButtonElement>("share-result");
+const resultDialog = requiredElement<HTMLDialogElement>("result-dialog");
+const closeResultDialogButton = requiredElement<HTMLButtonElement>(
+  "close-result-dialog",
+);
+const copyResultButton = requiredElement<HTMLButtonElement>("copy-result");
+const resultDialogSummaryElement = requiredElement<HTMLParagraphElement>(
+  "result-dialog-summary",
+);
+const resultShareStatusElement = requiredElement<HTMLParagraphElement>(
+  "result-share-status",
+);
+const manualShareElement = requiredElement<HTMLDivElement>("manual-share");
+const manualShareTextElement = requiredElement<HTMLTextAreaElement>(
+  "manual-share-text",
+);
 const revealWarningDialog = requiredElement<HTMLDialogElement>("reveal-warning");
 const cancelRevealButton = requiredElement<HTMLButtonElement>("cancel-reveal");
 const confirmRevealButton = requiredElement<HTMLButtonElement>("confirm-reveal");
@@ -116,7 +132,9 @@ tutorialNextButton.addEventListener("click", () => {
   renderTutorial();
 });
 tutorialDialog.addEventListener("close", rememberTutorialSeen);
-shareResultButton.addEventListener("click", () => void shareResult());
+shareResultButton.addEventListener("click", openResultDialog);
+closeResultDialogButton.addEventListener("click", () => resultDialog.close());
+copyResultButton.addEventListener("click", () => void copyShareResult());
 wildcardInput.addEventListener("input", () => {
   wildcardInput.value = wildcardInput.value.replace(/[^a-z]/gi, "").slice(0, 1);
   renderSelection();
@@ -148,6 +166,9 @@ async function loadGame(): Promise<void> {
 }
 
 function startPuzzle(): void {
+  if (resultDialog.open) {
+    resultDialog.close();
+  }
   game = createGame(selectPuzzle(dictionary, DAILY_MODE));
   selectedPath = [];
   minimumSolution = findMinimumWordSolution(game.board, dictionary);
@@ -431,6 +452,9 @@ function submitSelection(): void {
   }
 
   render();
+  if (game.completed) {
+    openResultDialog();
+  }
 }
 
 function requestRevealAnswer(): void {
@@ -465,34 +489,41 @@ function revealAnswer(): void {
       : "Answer revealed. Your score is frozen.",
     "neutral",
   );
+  openResultDialog();
 }
 
-async function shareResult(): Promise<void> {
+function openResultDialog(): void {
   if (!isGameOver(game)) {
     return;
   }
 
-  const text = shareText(game, window.location.href);
-
-  if (navigator.share) {
-    try {
-      await navigator.share({ text });
-      showMessage("Share opened.", "success");
-      return;
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        showMessage("Sharing cancelled.", "neutral");
-        return;
-      }
-    }
+  resultDialogSummaryElement.textContent = resultSummary(game, minimumSolution.length);
+  resultShareStatusElement.textContent = "";
+  manualShareElement.hidden = true;
+  manualShareTextElement.value = "";
+  if (!resultDialog.open) {
+    resultDialog.showModal();
   }
+  copyResultButton.focus();
+}
+
+async function copyShareResult(): Promise<void> {
+  if (!isGameOver(game)) {
+    return;
+  }
+
+  const text = shareText(game, window.location.href, minimumSolution.length);
 
   try {
     await navigator.clipboard.writeText(text);
-    showMessage("Result copied to the clipboard.", "success");
+    resultShareStatusElement.textContent = "Copied! Paste it anywhere.";
+    manualShareElement.hidden = true;
   } catch {
-    window.prompt("Copy your SpellSweep result:", text);
-    showMessage("Copy the displayed result to share it.", "neutral");
+    resultShareStatusElement.textContent = "Copy the text below to share your result.";
+    manualShareTextElement.value = text;
+    manualShareElement.hidden = false;
+    manualShareTextElement.focus();
+    manualShareTextElement.select();
   }
 }
 

@@ -30,6 +30,17 @@ h1 {
   margin-bottom: 0.25rem;
 }
 
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-mark {
+  width: 2rem;
+  height: 2rem;
+}
+
 .show-tutorial {
   padding: 0.35rem 0.65rem !important;
   font-size: 0.9rem !important;
@@ -211,6 +222,7 @@ button:disabled {
 }
 
 .reveal-warning,
+.result-dialog,
 .tutorial-dialog {
   max-width: min(24rem, calc(100% - 2rem));
   padding: 1.25rem;
@@ -220,12 +232,66 @@ button:disabled {
 }
 
 .reveal-warning::backdrop,
+.result-dialog::backdrop,
 .tutorial-dialog::backdrop {
   background: rgb(0 0 0 / 45%);
 }
 
 .reveal-warning h2 {
   margin-top: 0;
+}
+
+.result-dialog {
+  position: relative;
+  width: min(22rem, calc(100% - 2rem));
+}
+
+.result-dialog h2 {
+  margin: 0 2rem 0.75rem;
+}
+
+.close-result-dialog {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.1rem !important;
+  font-size: 1.5rem !important;
+  line-height: 1 !important;
+}
+
+.result-dialog-summary {
+  margin: 0.5rem 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.result-share-status {
+  min-height: 1.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.manual-share {
+  margin-top: 0.75rem;
+  text-align: left;
+}
+
+.manual-share[hidden] {
+  display: none;
+}
+
+.manual-share label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.manual-share textarea {
+  width: 100%;
+  padding: 0.5rem;
+  resize: vertical;
+  font: inherit;
 }
 
 .tutorial-dialog {
@@ -467,6 +533,21 @@ button:disabled {
   font-weight: 700;
 }
 
+.site-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  width: min(100% - 2rem, 32rem);
+  margin: 2rem auto 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.9rem;
+}
+
+.site-footer a {
+  color: inherit;
+}
+
 @media (max-width: 30rem) {
   main {
     width: min(100% - 1rem, 32rem);
@@ -475,6 +556,17 @@ button:disabled {
 
   .title-row {
     gap: 0.6rem;
+  }
+
+  .brand-mark {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .site-footer {
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    width: min(100% - 1rem, 32rem);
   }
 
   .tutorial-dialog {
