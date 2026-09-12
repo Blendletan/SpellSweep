@@ -359,16 +359,19 @@ Completion criteria: a first-time player is automatically shown a concise walkth
 - [x] Add GoatCounter's smallest supported page-view integration to the static site.
 - [x] Record one custom event whenever a player activates the Share Result button.
 - [x] Count the share-button activation without including the puzzle, score, share text, or other player-entered data.
+- [x] Record one custom event when a player confirms Reveal solution on an unfinished puzzle, counting a give-up without counting post-win answer views.
+- [x] Count the reveal confirmation without including the puzzle, score, solution, or other player-entered data.
 - [x] Ensure analytics failure or blocking never interferes with gameplay or sharing.
 - [x] Add a brief privacy disclosure if the final GoatCounter configuration or applicable policy requires one.
 - [ ] Verify production page-view counting on GitHub Pages.
+- [ ] Verify the confirmed give-up event is counted once on desktop and mobile and is not emitted by post-win answer views.
 - [ ] Verify the Share Result event is counted once per button activation on desktop and mobile.
 
-Keep analytics limited to aggregate page visits and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The separate first-party functional cookie required by Milestone 17 stores only whether the tutorial has already been shown and must not be sent to GoatCounter.
+Keep analytics limited to aggregate page visits, confirmed unfinished-puzzle reveals, and Share Result button activations. Do not add a tag manager, analytics framework, analytics or tracking cookies, user accounts, or broader behavioral tracking. The separate first-party functional cookie required by Milestone 17 stores only whether the tutorial has already been shown and must not be sent to GoatCounter.
 
-Implementation progress (September 11, 2026): SpellSweep now uses the confirmed `blendletan` GoatCounter site code for ordinary page views and a single constant `spellsweep-share-result` event on the result-copy button. The declarative click integration contains no puzzle, score, share text, or player-entered values, and blocked analytics remains independent of the game's own click handler. No additional in-game privacy disclosure was added for this cookie-free aggregate configuration; re-evaluate that decision if the analytics settings or applicable policy change. Production dashboard confirmation and desktop/mobile event checks remain part of the final one-to-two-day launch test.
+Implementation progress (September 11, 2026): SpellSweep now uses the confirmed `blendletan` GoatCounter site code for ordinary page views, a constant `spellsweep-puzzle-revealed` event on the unfinished-run reveal confirmation, and a constant `spellsweep-share-result` event on the result-copy button. Post-win answer views do not emit the reveal event. The declarative click integrations contain no puzzle, score, solution, share text, or player-entered values, and blocked analytics remains independent of the game's own click handlers. No additional in-game privacy disclosure was added for this cookie-free aggregate configuration; re-evaluate that decision if the analytics settings or applicable policy change. Production dashboard confirmation and desktop/mobile event checks remain part of the final one-to-two-day launch test.
 
-Completion criteria: GoatCounter reports public-site visits and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those two aggregate events.
+Completion criteria: GoatCounter reports public-site visits, confirmed give-ups, and Share Result button activations accurately while the game remains a simple static site and sends no game or player data beyond those three aggregate events.
 
 ## Ongoing Constraints
 
