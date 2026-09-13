@@ -30,6 +30,7 @@ import {
 } from "./tutorial.js";
 
 const DAILY_MODE = true;
+const SHARE_URL = "https://blendletan.github.io/SpellSweep/";
 const DAILY_PROGRESS_COOKIE_NAME = "spellsweepDailyProgress";
 const TUTORIAL_COOKIE_NAME = "spellsweepTutorialSeen";
 const TUTORIAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
@@ -656,7 +657,7 @@ async function copyShareResult(): Promise<void> {
 
   const text = shareText(
     game,
-    window.location.href,
+    SHARE_URL,
     minimumSolution.length,
     activePuzzleNumber,
   );
