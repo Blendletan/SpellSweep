@@ -167,7 +167,7 @@ setInterval(checkForNewDailyPuzzle, 30_000);
 
 async function loadGame(): Promise<void> {
   try {
-    const response = await fetch("./data/dictionary.txt");
+    const response = await fetch("./cleanedDictionary.txt");
     if (!response.ok) {
       throw new Error(`Dictionary request failed with status ${response.status}.`);
     }

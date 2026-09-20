@@ -43,8 +43,8 @@ jobs:
       - name: Assemble static site
         run: |
           mkdir _site
-          cp index.html style.css _site/
-          cp -R build data assets _site/
+          cp index.html style.css cleanedDictionary.txt _site/
+          cp -R build assets _site/
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

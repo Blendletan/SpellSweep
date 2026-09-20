@@ -12,7 +12,7 @@ import {
   submitWord,
 } from "../src/game.ts";
 
-const dictionaryUrl = new URL("../data/dictionary.txt", import.meta.url);
+const dictionaryUrl = new URL("../cleanedDictionary.txt", import.meta.url);
 
 const readStarted = performance.now();
 const dictionaryText = await readFile(dictionaryUrl, "utf8");

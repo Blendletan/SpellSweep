@@ -57,8 +57,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   },
   {
     title: "Cover the board",
-    description:
-      "Trace valid words to cover all 25 tiles. SpellSweep uses the North American Scrabble dictionary.",
+    description: "Trace valid words to cover all 25 tiles.",
     acceptedWordCount: 0,
   },
   {

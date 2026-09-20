@@ -22,15 +22,14 @@ import {
 
 test("the authoritative dictionary loads and can produce a daily puzzle", async () => {
   const dictionaryText = await readFile(
-    new URL("../data/dictionary.txt", import.meta.url),
+    new URL("../cleanedDictionary.txt", import.meta.url),
     "utf8",
   );
   const words = parseDictionary(dictionaryText);
 
-  assert.equal(words.size, 178_691);
-  assert.equal(words.has("aa"), true);
+  assert.equal(words.size, 64_342);
   assert.equal(words.has("cat"), true);
-  assert.equal(words.has("zyzzyvas"), true);
+  assert.equal(words.has("houseplant"), true);
 
   const dictionary = createDictionaryIndex(words);
   const date = new Date(2026, 8, 8, 12);

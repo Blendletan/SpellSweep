@@ -17,7 +17,7 @@ Do not skip ahead to architecture, optimization, or visual polish. Keep the impl
 - [x] Inventory the existing source files, scripts, tests, dictionary, and puzzle data.
 - [x] Identify useful existing work and unrelated user changes that must be preserved.
 - [x] Confirm the current build and test commands.
-- [x] Confirm that `data/dictionary.txt` has the expected format and is the only authoritative dictionary.
+- [x] Confirm that `cleanedDictionary.txt` has the expected format and is the only authoritative dictionary.
 - [x] Decide the initial value of `DAILY_MODE`.
 
 Decision: keep `DAILY_MODE = false` during development and playtesting. Enabling it for release remains a one-line change to the same boolean.
@@ -36,7 +36,7 @@ Completion criteria: a game state can be created, inspected, and reset using ord
 
 ## Milestone 2: Dictionary and Path Rules
 
-- [x] Load and normalize `data/dictionary.txt`.
+- [x] Load and normalize `cleanedDictionary.txt`.
 - [x] Support fast full-word membership checks.
 - [x] Support prefix checks if required by the board search.
 - [x] Implement horizontal, vertical, and diagonal adjacency.
@@ -190,7 +190,7 @@ Completion criteria: the game performs acceptably on its intended browsers, or a
 - [x] Confirm the GitHub repository, default branch, and intended Pages URL.
 - [x] Add the smallest practical GitHub Pages workflow.
 - [x] Install dependencies with the committed lockfile and compile TypeScript in the workflow.
-- [x] Assemble a static artifact containing `index.html`, `style.css`, `build/`, and `data/dictionary.txt` without committing generated build output.
+- [x] Assemble a static artifact containing `index.html`, `style.css`, `build/`, and `cleanedDictionary.txt` without committing generated build output.
 - [x] Keep `DAILY_MODE = false` for this playtesting deployment.
 - [x] Push the reviewed source and workflow to GitHub only after explicit approval.
 - [x] Enable or verify GitHub Pages using the workflow artifact.
@@ -325,9 +325,9 @@ This is the current implementation priority within the iterative playtesting loo
 - [x] Decide dismissal behavior: closing, skipping, or completing the tutorial records the cookie so later visits are not interrupted.
 - [x] Decide replay behavior: keep a permanent How to play control that reopens the tutorial at its first step without clearing or changing the active puzzle.
 - [x] Curate an example board using familiar words and a clear 6-word solution against a Perfect score of 4.
-- [x] Validate every demonstrated word and path against `data/dictionary.txt`, and use the existing exact solver to verify the example's stated Perfect score against the full dictionary.
+- [x] Validate every demonstrated word and path against `cleanedDictionary.txt`, and use the existing exact solver to verify the example's stated Perfect score against the full dictionary.
 - [x] Introduce the objective: cover all 25 tiles by submitting valid words.
-- [x] Tell players explicitly that SpellSweep uses the North American Scrabble dictionary.
+- [x] Explain valid words without attributing the word list to Scrabble.
 - [x] Demonstrate tile-selection order and adjacent horizontal and vertical movement.
 - [x] Demonstrate a diagonal move clearly enough that it cannot be mistaken for an orthogonal path.
 - [x] Explain that a tile cannot be repeated within one word.
@@ -351,7 +351,7 @@ Prefer a small in-page walkthrough built with the existing HTML, CSS, and TypeSc
 
 Implementation result (September 10, 2026): the ten-step tutorial uses HOUSE, HOT, PLANT, WATER, BREAD, and BREAD to finish its fixed example in 6 words, then shows how HOUSEPLANT replaces the first three plays to reach the exact Perfect score of 4. The example was verified against the full authoritative dictionary. The tutorial opens automatically until dismissed, stores only a first-party seen flag, remains replayable from How to play, and leaves the live puzzle untouched. TypeScript compiles, all 25 tests pass, and local browser testing verified keyboard navigation, Escape dismissal, narrow-screen scrolling, cookie persistence, and replay from step one.
 
-Completion criteria: a first-time player is automatically shown a concise walkthrough that explains the North American Scrabble dictionary, movement, reuse, wildcard, scoring, and optimization rules; dismissal persists across later visits; and any player can reopen the tutorial without affecting an active puzzle. Complete.
+Completion criteria: a first-time player is automatically shown a concise walkthrough that explains movement, reuse, wildcard, scoring, and optimization rules; dismissal persists across later visits; and any player can reopen the tutorial without affecting an active puzzle. Complete.
 
 ## Milestone 18: GoatCounter Analytics
 

@@ -98,16 +98,10 @@ It behaves like an ordinary tile in all other respects:
 The authoritative word list is:
 
 ```text
-data/dictionary.txt
+cleanedDictionary.txt
 ```
 
-For the current prototype, this file contains the North American Scrabble dictionary.
-
 A submitted word is valid if it can be formed according to the board rules and exists in this dictionary.
-
-The tutorial must tell players that SpellSweep uses the North American Scrabble dictionary so they understand which words the game recognizes.
-
-Do not substitute another dictionary unless explicitly instructed.
 
 ---
 
@@ -216,7 +210,6 @@ SpellSweep must include a short, step-by-step tutorial built around a fixed exam
 The tutorial must:
 
 - explain that the goal is to cover all 25 tiles with valid words;
-- identify the word list as the North American Scrabble dictionary;
 - demonstrate horizontal, vertical, and diagonal movement;
 - explain that a tile cannot be used twice within one word;
 - demonstrate that covered tiles remain available in later words;
