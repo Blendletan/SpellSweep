@@ -34,6 +34,24 @@ const SHARE_URL = "https://blendletan.github.io/SpellSweep/";
 const DAILY_PROGRESS_COOKIE_NAME = "spellsweepDailyProgress";
 const TUTORIAL_COOKIE_NAME = "spellsweepTutorialSeen";
 const TUTORIAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
+const MAX_PENDING_ANALYTICS_HITS = 100;
+
+type GoatCounterHit = {
+  readonly path: string;
+  readonly title: string;
+  readonly event: true;
+  readonly no_session: true;
+};
+
+declare global {
+  interface Window {
+    goatcounter?: {
+      count?: (hit: GoatCounterHit) => void;
+    };
+  }
+}
+
+const pendingAnalyticsHits: GoatCounterHit[] = [];
 
 type SavedDailyProgress = {
   dateKey: string;
@@ -162,6 +180,11 @@ wildcardInput.addEventListener("input", () => {
 });
 document.addEventListener("keydown", handleKeyDown);
 
+document
+  .querySelector<HTMLScriptElement>("script[data-goatcounter]")
+  ?.addEventListener("load", flushAnalyticsHits);
+
+trackKofiDonateWidget();
 void loadGame();
 setInterval(checkForNewDailyPuzzle, 30_000);
 
@@ -809,6 +832,62 @@ function showMessage(
   messageElement.textContent = message;
   messageElement.classList.toggle("error", kind === "error");
   messageElement.classList.toggle("success", kind === "success");
+}
+
+function trackEvent(path: string, title: string): void {
+  const hit: GoatCounterHit = {
+    path: `spellsweep-${path}`,
+    title: `SpellSweep: ${title}`,
+    event: true,
+    no_session: true,
+  };
+
+  if (!sendAnalyticsHit(hit)) {
+    if (pendingAnalyticsHits.length < MAX_PENDING_ANALYTICS_HITS) {
+      pendingAnalyticsHits.push(hit);
+    }
+  }
+}
+
+function sendAnalyticsHit(hit: GoatCounterHit): boolean {
+  if (typeof window.goatcounter?.count !== "function") {
+    return false;
+  }
+
+  try {
+    window.goatcounter.count(hit);
+  } catch {
+    // Analytics must never interrupt play.
+  }
+  return true;
+}
+
+function flushAnalyticsHits(): void {
+  const hits = pendingAnalyticsHits.splice(0);
+  for (const hit of hits) {
+    sendAnalyticsHit(hit);
+  }
+}
+
+function trackKofiDonateWidget(): void {
+  const buttonFrames = document.querySelectorAll<HTMLIFrameElement>(
+    'iframe[id^="kofi-wo-container"]',
+  );
+
+  for (const frame of buttonFrames) {
+    const button = frame.contentDocument?.querySelector<HTMLElement>(
+      ".floatingchat-donate-button",
+    );
+    button?.addEventListener(
+      "click",
+      () => {
+        if (button.classList.contains("closed")) {
+          trackEvent("kofi-donate-click", "Ko-fi donate widget opened");
+        }
+      },
+      { capture: true },
+    );
+  }
 }
 
 function requiredElement<ElementType extends HTMLElement>(id: string): ElementType {
