@@ -25,20 +25,33 @@ h1 {
 .title-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 0.25rem;
 }
 
 .brand-title {
+  min-width: 0;
+  text-align: left;
+}
+
+.publisher-lockup {
   display: flex;
+  min-height: 1.35rem;
+  margin-bottom: 0.1rem;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  color: #68736f;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
 .brand-mark {
-  width: 2rem;
-  height: 2rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: 0 0 auto;
 }
 
 .show-tutorial {
@@ -537,14 +550,19 @@ button:disabled {
   justify-content: center;
   gap: 1.25rem;
   width: min(100% - 2rem, 32rem);
-  margin: 2rem auto 1.5rem;
-  padding-top: 1rem;
+  margin: 2rem auto 0;
+  padding: 1rem 0 2.5rem;
   border-top: 1px solid #d1d5db;
   font-size: 17px;
 }
 
 .site-footer a {
   color: inherit;
+}
+
+iframe.floatingchat-container {
+  width: 254px !important;
+  max-width: calc(100vw - 2rem) !important;
 }
 
 @media (max-width: 30rem) {
@@ -558,14 +576,19 @@ button:disabled {
   }
 
   .brand-mark {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .publisher-lockup {
+    font-size: 0.65rem;
   }
 
   .site-footer {
     flex-wrap: wrap;
     gap: 0.75rem 1rem;
     width: min(100% - 1rem, 32rem);
+    padding-bottom: 6.5rem;
   }
 
   .tutorial-dialog {

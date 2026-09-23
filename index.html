@@ -24,12 +24,17 @@
     <main>
       <div class="title-row">
         <div class="brand-title">
-          <img
-            class="brand-mark"
-            src="./assets/rmlp-logo-mark.svg"
-            alt=""
-            aria-hidden="true"
-          />
+          <div class="publisher-lockup" aria-label="An RMLP puzzle">
+            <img
+              class="brand-mark"
+              src="./assets/rmlp-logo-mark.svg"
+              width="64"
+              height="64"
+              alt=""
+              aria-hidden="true"
+            />
+            <span>RMLP puzzle</span>
+          </div>
           <h1>SpellSweep</h1>
         </div>
         <button id="show-tutorial" class="show-tutorial" type="button">
@@ -200,13 +205,17 @@
 
     <footer class="site-footer">
       <a href="mailto:robertparkinson@shaw.ca">Send feedback</a>
-      <a
-        href="https://www.paypal.com/paypalme/AceBlender"
-        target="_blank"
-        rel="noopener noreferrer"
-      >Support more puzzles ☕</a>
     </footer>
 
+    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+    <script>
+      kofiWidgetOverlay.draw("randomlittlepuzzles", {
+        type: "floating-chat",
+        "floating-chat.donateButton.text": "Support More Puzzles",
+        "floating-chat.donateButton.background-color": "#00b9fe",
+        "floating-chat.donateButton.text-color": "#fff",
+      });
+    </script>
     <script type="module" src="./build/main.js"></script>
     <script
       data-goatcounter="https://blendletan.goatcounter.com/count"
