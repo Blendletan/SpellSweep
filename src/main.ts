@@ -129,6 +129,7 @@ const tutorialStepCountElement = requiredElement<HTMLElement>("tutorial-step-cou
 const tutorialProgressElement = requiredElement<HTMLDivElement>("tutorial-progress");
 const tutorialBackButton = requiredElement<HTMLButtonElement>("tutorial-back");
 const tutorialNextButton = requiredElement<HTMLButtonElement>("tutorial-next");
+const morePuzzlesLink = requiredElement<HTMLAnchorElement>("more-puzzles-link");
 
 let dictionary: DictionaryIndex;
 let game: GameState;
@@ -173,6 +174,9 @@ tutorialDialog.addEventListener("close", rememberTutorialSeen);
 shareResultButton.addEventListener("click", openResultDialog);
 closeResultDialogButton.addEventListener("click", () => resultDialog.close());
 copyResultButton.addEventListener("click", () => void copyShareResult());
+morePuzzlesLink.addEventListener("click", () => {
+  trackEvent("more-puzzles-click", "More puzzles clicked");
+});
 wildcardInput.addEventListener("input", () => {
   wildcardInput.value = wildcardInput.value.replace(/[^a-z]/gi, "").slice(0, 1);
   renderSelection();
