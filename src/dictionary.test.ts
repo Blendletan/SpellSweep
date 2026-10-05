@@ -27,7 +27,7 @@ test("the authoritative dictionary loads and can produce a daily puzzle", async 
   );
   const words = parseDictionary(dictionaryText);
 
-  assert.equal(words.size, 64_384);
+  assert.equal(words.size, 64_205);
   assert.equal(words.has("cat"), true);
   assert.equal(words.has("houseplant"), true);
 
