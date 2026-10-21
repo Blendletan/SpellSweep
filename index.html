@@ -1,238 +1,88 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpellSweep — Free Daily Word Puzzle | RMLP</title>
-    <meta
-      name="description"
-      content="Play SpellSweep, a free daily word puzzle. Connect adjacent letters on a 5×5 board and cover every tile using as few words as possible."
-    />
-    <link rel="canonical" href="https://blendletan.github.io/SpellSweep/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="SpellSweep — Free Daily Word Puzzle" />
-    <meta
-      property="og:description"
-      content="Connect adjacent letters on a 5×5 board and cover every tile using as few words as possible. Play a new free puzzle every day."
-    />
-    <meta property="og:url" content="https://blendletan.github.io/SpellSweep/" />
-    <meta property="og:site_name" content="RMLP" />
-    <link rel="icon" type="image/svg+xml" href="./assets/rmlp-logo-mark.svg" />
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <main>
-      <div class="title-row">
-        <div class="brand-title">
-          <div class="publisher-lockup" aria-label="An RMLP puzzle">
-            <img
-              class="brand-mark"
-              src="./assets/rmlp-logo-mark.svg"
-              width="64"
-              height="64"
-              alt=""
-              aria-hidden="true"
-            />
-            <span>RMLP puzzle</span>
-          </div>
-          <h1>SpellSweep</h1>
-        </div>
-        <button id="show-tutorial" class="show-tutorial" type="button">
-          How to play
-        </button>
-      </div>
-      <p class="instructions">
-        A free daily word puzzle. Select adjacent tiles to make words and cover
-        every tile. Use fewer words for a better score.
-      </p>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpellSweep has moved | RMLP</title>
+  <meta name="description" content="SpellSweep has moved to Random Mind-bending Little Puzzles.">
+  <link rel="canonical" href="https://randomlittlepuzzles.com/spell-sweep/">
+  <!-- JavaScript-disabled fallback (cannot preserve query parameters). -->
+  <meta http-equiv="refresh" content="2;url=https://randomlittlepuzzles.com/spell-sweep/">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f6efdd;
+      color: #2a2018;
+      font: 1rem/1.5 system-ui, sans-serif;
+      text-align: center;
+    }
+    main { padding: 2rem; }
+    a { color: #1f5c55; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>SpellSweep has moved</h1>
+    <p>Redirecting you to our new website&hellip;</p>
+    <p><a id="continue" href="https://randomlittlepuzzles.com/spell-sweep/">Continue to SpellSweep</a></p>
+  </main>
+  <script>
+    (() => {
+      'use strict';
 
-      <section class="score" aria-label="Current score">
-        <span>Score: <strong id="score-value">0</strong></span>
-        <span>Perfect: <strong id="perfect-score">—</strong></span>
-        <span>Par: <strong id="par-score">—</strong></span>
-        <span>Covered: <strong id="covered-count">0</strong>/25</span>
-      </section>
+      const destination = new URL('https://randomlittlepuzzles.com/spell-sweep/');
+      destination.search = location.search;
+      destination.hash = location.hash;
+      document.getElementById('continue').href = destination.href;
 
-      <div id="board" class="board" aria-label="SpellSweep board"></div>
+      const redirect = () => location.replace(destination.href);
 
-      <section class="word-panel" aria-label="Selected word">
-        <div id="current-word" class="current-word">Select a tile</div>
-        <label id="wildcard-control" class="wildcard-control" hidden>
-          Wildcard letter
-          <input
-            id="wildcard-letter"
-            type="text"
-            inputmode="text"
-            maxlength="1"
-            autocomplete="off"
-            aria-label="Letter represented by the wildcard"
-          />
-        </label>
-        <div class="actions">
-          <button id="submit-word" type="button" disabled>Submit word</button>
-          <button id="clear-path" type="button" disabled>Clear</button>
-        </div>
-      </section>
-
-      <button id="reveal-answer" class="reveal-answer" type="button" disabled>
-        Reveal answer
-      </button>
-
-      <p id="message" class="message" role="status" aria-live="polite">
-        Loading dictionary…
-      </p>
-
-      <section id="revealed-answer" class="revealed-answer" hidden>
-        <h2>Minimum-word solution</h2>
-        <p id="answer-summary"></p>
-        <div id="answer-words" class="answer-words"></div>
-        <p class="answer-help">Select a word to see its path on the board.</p>
-      </section>
-
-      <button id="share-result" type="button" hidden>Share result</button>
-
-      <dialog
-        id="tutorial-dialog"
-        class="tutorial-dialog"
-        aria-labelledby="tutorial-title"
-      >
-        <div class="tutorial-header">
-          <div>
-            <p class="tutorial-eyebrow">How to play SpellSweep</p>
-            <h2 id="tutorial-title"></h2>
-          </div>
-          <button
-            id="close-tutorial"
-            class="close-tutorial"
-            type="button"
-            aria-label="Close tutorial"
-          >
-            ×
-          </button>
-        </div>
-
-        <p
-          id="tutorial-description"
-          class="tutorial-description"
-          aria-live="polite"
-        ></p>
-
-        <section
-          id="tutorial-example"
-          class="tutorial-example"
-          aria-label="Tutorial example puzzle"
-        >
-          <div class="tutorial-score" aria-label="Example score">
-            <span>Score: <strong id="tutorial-score">0</strong></span>
-            <span>Perfect: <strong id="tutorial-perfect">4</strong></span>
-            <span>Par: <strong id="tutorial-par">7</strong></span>
-            <span>Covered: <strong id="tutorial-covered">0</strong>/25</span>
-          </div>
-
-          <div
-            id="tutorial-board"
-            class="tutorial-board"
-            role="img"
-            aria-label="Example SpellSweep board"
-          ></div>
-
-          <p id="tutorial-current-word" class="tutorial-current-word"></p>
-          <div
-            id="tutorial-word-list"
-            class="tutorial-word-list"
-            aria-label="Example words played"
-          ></div>
-        </section>
-
-        <div id="tutorial-progress-row" class="tutorial-progress-row">
-          <span id="tutorial-step-count">Step 1 of 10</span>
-          <div id="tutorial-progress" class="tutorial-progress" aria-hidden="true"></div>
-        </div>
-
-        <div class="tutorial-actions">
-          <button id="tutorial-back" type="button">Back</button>
-          <button id="tutorial-next" type="button">Next</button>
-        </div>
-      </dialog>
-
-      <dialog id="reveal-warning" class="reveal-warning">
-        <h2>Reveal the answer?</h2>
-        <p>This will end your run and freeze your score.</p>
-        <div class="actions">
-          <button id="cancel-reveal" type="button">Keep playing</button>
-          <button
-            id="confirm-reveal"
-            type="button"
-            data-goatcounter-click="spellsweep-puzzle-revealed"
-            data-goatcounter-title="SpellSweep: Puzzle revealed"
-          >
-            Reveal solution
-          </button>
-        </div>
-      </dialog>
-
-      <dialog
-        id="result-dialog"
-        class="result-dialog"
-        aria-labelledby="result-dialog-title"
-        aria-describedby="result-dialog-summary"
-      >
-        <button
-          id="close-result-dialog"
-          class="close-result-dialog"
-          type="button"
-          aria-label="Close result"
-        >
-          ×
-        </button>
-        <h2 id="result-dialog-title">SpellSweep</h2>
-        <p id="result-dialog-summary" class="result-dialog-summary"></p>
-        <button
-          id="copy-result"
-          type="button"
-          data-goatcounter-click="spellsweep-share-result"
-          data-goatcounter-title="SpellSweep: Share result"
-        >
-          Share result
-        </button>
-        <p id="result-share-status" class="result-share-status" aria-live="polite"></p>
-        <div id="manual-share" class="manual-share" hidden>
-          <label for="manual-share-text">Copy your result manually</label>
-          <textarea id="manual-share-text" rows="5" readonly></textarea>
-        </div>
-      </dialog>
-    </main>
-
-    <footer class="site-footer">
-      <a href="mailto:robertparkinson@shaw.ca">Send feedback</a>
-      <a
-        id="more-puzzles-link"
-        href="https://blendletan.github.io/RandomLittlePuzzles/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        More puzzles
-      </a>
-    </footer>
-
-    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
-    <script>
-      const supportButtonText = window.matchMedia("(max-width: 30rem)").matches
-        ? "Support us"
-        : "Support More Puzzles";
-
-      kofiWidgetOverlay.draw("randomlittlepuzzles", {
-        type: "floating-chat",
-        "floating-chat.donateButton.text": supportButtonText,
-        "floating-chat.donateButton.background-color": "#00b9fe",
-        "floating-chat.donateButton.text-color": "#fff",
+      // Preserve the existing GoatCounter account and original page path.
+      // The q parameter supplies campaign information, including UTM tags.
+      // This is the documented GoatCounter /count tracking endpoint.
+      const data = new URLSearchParams({
+        p: location.pathname,
+        t: document.title,
+        q: location.search,
+        s: String(screen.width),
+        rnd: Math.random().toString(36).slice(2)
       });
-    </script>
-    <script type="module" src="./build/main.js"></script>
-    <script
-      data-goatcounter="https://blendletan.goatcounter.com/count"
-      async
-      src="https://gc.zgo.at/count.js"
-    ></script>
-  </body>
+      if (document.referrer) data.set('r', document.referrer);
+
+      const trackingUrl = 'https://blendletan.goatcounter.com/count?' + data.toString();
+
+      // Match GoatCounter's built-in preference to skip tracking.
+      try {
+        if (localStorage.getItem('skipgc') === 't') {
+          redirect();
+          return;
+        }
+      } catch (_) { /* Storage can be unavailable; don't block navigation. */ }
+
+      // GoatCounter uses sendBeacon itself; it survives page navigation.
+      // If unsupported or not queued, try its documented image fallback.
+      try {
+        if (navigator.sendBeacon && navigator.sendBeacon(trackingUrl)) {
+          redirect();
+          return;
+        }
+      } catch (_) { /* Try the image fallback. */ }
+
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        redirect();
+      };
+      const pixel = new Image();
+      pixel.onload = finish;
+      pixel.onerror = finish;
+      setTimeout(finish, 800);
+      pixel.src = trackingUrl;
+    })();
+  </script>
+</body>
 </html>
